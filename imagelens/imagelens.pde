@@ -15,6 +15,7 @@
 //   SPACE - to save
 //   ENTER - go into interactive mode, move mouse to change bendx, bendy
 //   Click - to make random change
+//   c - to change colourlovers pattern (if enabled)
 
 // hint: if you work on some channel only (leaving rest untouched)
 //       find line with fill(n) - there are hidden other options as a comments
@@ -23,6 +24,10 @@
 String filename = "test.jpg"; // image to process 
 String lensfilename = null; // use different image to use as lens (null = use same as image to process)
 //String lensfilename = "lens1.jpg"; 
+
+// set to true to use colour lovers random pattern
+// http://www.colourlovers.com/patterns
+boolean use_clpattern = false;
 
 // parameters
 float bendx = 0.1; // from 0 to 1
@@ -62,6 +67,17 @@ boolean interactive = false; // move mouse to set bend when active, ENTER to act
 
 float[] facts = new float[2];
 
+void getCLPattern() {
+  int n = (int)random(1,4718640);
+  print("Loading pattern from ColourLovers number: "+n+"...");
+  int w = width;
+  int h = height+200;
+  String clname = "http://www.colourlovers.com/wallPaper/"+w+"x"+h+"/n/"+n+"/";
+  PImage i = loadImage(clname, "png");	
+  limg = i.get(0,0,width,height);
+  println(" done");
+}
+
 void setup() {
   img = loadImage(filename);
   img.loadPixels();
@@ -74,6 +90,8 @@ void setup() {
   
   size(img.width,img.height);
   noStroke();
+
+  if(use_clpattern) getCLPattern();
 
   facts[0] = bendx * width;
   facts[1] = bendy * height;
@@ -170,5 +188,11 @@ void keyPressed() {
   if(keyCode == 32) {
     saveFrame("res_"+(int)random(10000,99999)+"_"+filename);
     println("image saved");
+  }
+  
+  if(key == 'c' && use_clpattern) {
+    getCLPattern();
+    println("pattern changed");
+    drawMe();
   }
 }
