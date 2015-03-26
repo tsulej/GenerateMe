@@ -28,6 +28,8 @@ String lensfilename = null; // use different image to use as lens (null = use sa
 // set to true to use colour lovers random pattern
 // http://www.colourlovers.com/patterns
 boolean use_clpattern = false;
+// <1.0 bigger pattern, >1.0 smaller pattern
+float pattern_factor = 4.564;
 
 // parameters
 float bendx = 0.1; // from 0 to 1
@@ -68,13 +70,22 @@ boolean interactive = false; // move mouse to set bend when active, ENTER to act
 float[] facts = new float[2];
 
 void getCLPattern() {
-  int n = (int)random(1,4718640);
+  int n = (int)random(1,4719052);
   print("Loading pattern from ColourLovers number: "+n+"...");
-  int w = width;
-  int h = height+200;
-  String clname = "http://www.colourlovers.com/wallPaper/"+w+"x"+h+"/n/"+n+"/";
-  PImage i = loadImage(clname, "png");	
-  limg = i.get(0,0,width,height);
+  
+  String pad="";
+  if(n<1000) pad = "0";
+  else {
+    String nn = ""+n;
+    pad = nn.substring(0,nn.length()-3);
+  }
+  
+  String clname = "http://colourlovers.com.s3.amazonaws.com/images/patterns/"+pad+"/"+n+".png";
+  try {
+    limg = loadImage(clname, "png");
+  } catch(Exception e) {
+    getCLPattern();
+  }	
   println(" done");
 }
 
@@ -139,9 +150,9 @@ void drawMe() {
     background(0);
 
     for(int x=0;x<width;x++) {
-      int lx = (int)map(x,0,width-1,0,limg.width-1);
+      int lx = ((int)(x*pattern_factor))%limg.width;
       for(int y=0;y<height;y++) {
-        int ly = (int)map(y,0,height-1,0,limg.height-1);
+        int ly = ((int)(y*pattern_factor))%limg.height;
         color c = limg.pixels[lx+ly*limg.width];
         
         int posx = (x+getShift(c, 0)+2*width)%width;
