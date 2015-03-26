@@ -47,8 +47,6 @@ void setup() {
   int s = width>height?height:width;
   depth = (int)(log(s)/log(2));
 
-  println(depth);
-
   mouseClicked();
 }
 
