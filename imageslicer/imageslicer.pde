@@ -45,13 +45,13 @@ int max_patterns = 20; // how much patterns download from colourlovers, higher n
 // SEPARATE config
 float max_shift = 2; // max expected shift, using gaussian random, so bigger number, more distortion
 
-int type = ROTATE; // choose type of distortion: PATTERNS, SEPARATE, ROTATE, SHIFTCOPY
+int type = ROTATE; // choose type of distortion: PATTERNS, SEPARATE, ROTATE, SHIFTCOPY, SORT
 boolean do_blend = false; // blend result with original?
 int blend_type = SUBTRACT; // list here: https://processing.org/reference/blend_.html
 
 // segmentation config START
 float threshold = 500.0; // higher number - bigger segments
-int min_comp_size = 50; // minimal segment size (in pixels), minimum 10
+int min_comp_size = 200; // minimal segment size (in pixels), minimum 10
 int blur = 0; // sometimes it's good to blur image to have less sharp segment edges, 0 = off, blur > 0 - blur kernel size
 int stat_type = DIST; // edge calculation method
 
@@ -66,11 +66,11 @@ PImage img; // load image to this variable
 // segmentation config END
 
 // do not touch, list of types
-final static int PATTERNS = 0;
-final static int SEPARATE = 1;
-final static int ROTATE = 2;
-final static int SHIFTCOPY = 3;
-
+final static int PATTERNS = 0; // fill segments with patterns
+final static int SEPARATE = 1; // separate segments (black background visible)
+final static int ROTATE = 2; // rotate content of the segments
+final static int SHIFTCOPY = 3; // copy content from shifted image
+final static int SORT = 4; // sort segments by color value
 
 void setup() {
   img = loadImage(filename);
@@ -107,7 +107,7 @@ void setupRandom() {
     thr_max = -1;
   }
   if(random(1)<0.5) max_shift = 0; else max_shift = random(5);
-  type = (int)random(4);
+  type = (int)random(5);
   if(random(1)<0.3) {
     do_blend = true;
     blend_type = blends[(int)random(blends.length)];
@@ -125,8 +125,23 @@ class S {
     int dx, dy; // segment shift
     float rot, pats;
     PImage pat;
+    // sort
+    color[] clrs;
+    int[] positions;
+    boolean xy;
+    int iters;
 }
 Map<Integer,S> m = new HashMap<Integer,S>();
+
+void sortHelper(S segm, int x, int y) {
+  int xyval;
+  if(segm.xy)
+    xyval = (x << 16) | y;
+  else
+    xyval = (y << 16) | x;
+  segm.clrs[segm.iters] = img.get(x,y);
+  segm.positions[segm.iters++] = xyval; 
+}
 
 void processSlices() {
   m.clear();
@@ -138,7 +153,10 @@ void processSlices() {
       Integer segment = findEnd(y*width+x);
       
       S segm;
-      if(m.containsKey(segment)) segm = m.get(segment);
+      if(m.containsKey(segment)) {
+        segm = m.get(segment);
+        if(type == SORT) sortHelper(segm,x,y)
+      }
       else { 
         segm = new S();
         segm.rot = random(max_rotation);
@@ -151,10 +169,17 @@ void processSlices() {
           segm.pat = patterns[(int)random(max_patterns)];
           segm.pats = random(0.5,10);
         }
+        if(type == SORT) {
+          segm.xy = random(1)<0.5;
+          int size = elements[segment].size;
+          segm.clrs = new color[size];
+          segm.positions = new int[size];
+          segm.iters = 0;
+          sortHelper(segm,x,y);
+        }
         m.put(segment,segm);
       }
-
-    
+   
       if(type == PATTERNS) {
         int vx = segm.x-x;
         int vy = segm.y-y;
@@ -172,7 +197,7 @@ void processSlices() {
         int imgy = (2*y-segm.y)%height;
         fill(img.get(imgx,imgy));
         rect(x,y,1,1);
-      } else {
+      } else if(type == ROTATE) {
         int vx = segm.x-x;
         int vy = segm.y-y;
         float sinr = sin(segm.rot);
@@ -183,6 +208,30 @@ void processSlices() {
         rect(x,y,1,1);
       }
     }
+  
+  if(type == SORT) {
+    for(Integer key : m.keySet()) {
+      S segm = m.get(key);
+      segm.clrs = sort(segm.clrs);
+      segm.positions = sort(segm.positions);
+    }  
+    
+    for(Integer key : m.keySet()) {
+      S segm = m.get(key);
+      for(int i=0;i<segm.positions.length;i++) {
+        int x,y;
+        if(segm.xy) {
+          x = (segm.positions[i] >> 16) & 0xffff;
+          y = segm.positions[i] & 0xffff;
+        } else {
+          y = (segm.positions[i] >> 16) & 0xffff;
+          x = segm.positions[i] & 0xffff;
+        }
+        fill(segm.clrs[i]);
+        rect(x,y,1,1);
+      }
+    }  
+  }
   
   if(do_blend)
     blend(img,0,0,img.width,img.height,0,0,width,height,blend_type);
