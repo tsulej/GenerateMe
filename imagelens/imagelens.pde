@@ -29,7 +29,7 @@ String lensfilename = null; // use different image to use as lens (null = use sa
 // http://www.colourlovers.com/patterns
 boolean use_clpattern = false;
 // <1.0 bigger pattern, >1.0 smaller pattern
-float pattern_factor = 1;
+float pattern_factor = 4.1;
 
 // parameters
 float bendx = 0.1; // from 0 to 1
@@ -160,8 +160,8 @@ void drawMe() {
         
         color n = img.pixels[posx+posy*width];
         
-        //fill(n);
-         fill(red(c),green(c),blue(n)); // work only on blue channel
+        fill(n);
+       //  fill(red(c),green(c),blue(n)); // work only on blue channel
        //  fill(red(n), abs(green(c)-green(n)), blue(n)); // green channel is blended using difference method  
         rect(x,y,1,1);
       }
