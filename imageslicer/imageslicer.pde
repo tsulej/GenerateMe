@@ -155,7 +155,7 @@ void processSlices() {
       S segm;
       if(m.containsKey(segment)) {
         segm = m.get(segment);
-        if(type == SORT) sortHelper(segm,x,y)
+        if(type == SORT) sortHelper(segm,x,y);
       }
       else { 
         segm = new S();
