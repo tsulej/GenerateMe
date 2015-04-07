@@ -80,19 +80,28 @@ void setup() {
   
   processImage();
   processSlices();
+  printOptions(null);
 }
 
 void draw() {}
 
 void keyPressed() {
-  if(keyCode == 32)
-    saveFrame("res_"+(int)random(10000,99999)+"_"+filename);
+  if(keyCode == 32) {
+    String fn = "res_"+(int)random(10000,99999)+"_"+filename;
+    saveFrame(fn);
+    PrintWriter w = createWriter(fn+".txt");
+      printOptions(w);
+    w.flush();
+    w.close();
+    println("Image "+ fn + " saved");
+  }
 }
 
 void mouseClicked() {
   setupRandom();
   processImage();
   processSlices();
+  printOptions(null);
 }
 
 // random parameters
@@ -116,6 +125,61 @@ void setupRandom() {
   min_comp_size = (int)random(10,500);
   if(random(1)<0.1) blur = (int)random(1,6); else blur = 0;
   stat_type = (int)random(6);
+}
+
+void printOptions(PrintWriter w) {
+  ArrayList<String> buff = new ArrayList<String>();
+  buff.add("max_rotation = " + max_rotation);
+  buff.add("thr_min = " + thr_min);
+  buff.add("thr_max = " + thr_max);
+  buff.add("max_shift = " + max_shift);
+  String s = "type = ";
+  switch(type) {
+    case PATTERNS: s += "PATTERNS"; break;
+    case SHIFTCOPY: s+= "SHIFTCOPY"; break;
+    case ROTATE: s+= "ROTATE"; break;
+    case SEPARATE: s+= "SEPARATE"; break;
+    case SORT: s+= "SORT"; break;
+    default: break;   
+  }
+  buff.add(s);
+  buff.add("do_blend = " + (do_blend?"true":"false"));
+  s = "blend_type = ";
+  switch(blend_type) {
+    case ADD: s+="ADD"; break;
+    case SUBTRACT: s+="SUBTRACT"; break;
+    case DARKEST: s+="DARKEST"; break;
+    case LIGHTEST: s+="LIGHTEST"; break; 
+    case DIFFERENCE: s+="DIFFERENCE"; break;
+    case EXCLUSION: s+="EXCLUSION";break;
+    case MULTIPLY: s+="MULTIPLY"; break;
+    case SCREEN: s+="SCREEN"; break;
+    case OVERLAY: s+="OVERLAY"; break;
+    case HARD_LIGHT: s+="HARD_LIGHT";break;
+    case SOFT_LIGHT: s+="SOFT_LIGHT"; break;
+    case DODGE: s+="DODGE"; break; 
+    case BURN: s+="BURN"; break;
+    default: break;    
+  }
+  buff.add(s);
+  buff.add("threshold = " + threshold);
+  buff.add("min_comp_size = " + min_comp_size);
+  buff.add("blur = " + blur);
+  s = "stat_type = ";
+  switch(stat_type) {
+    case DIST: s+="DIST"; break;
+    case HUE: s+="HUE"; break;
+    case BRIGHTNESS: s+="BRIGHTNESS"; break;
+    case SATURATION: s+="SATURATION"; break;
+    case ABSDIST: s+="ABSDIST"; break;
+    default: break; 
+  }  
+  buff.add(s);
+  
+  for(String str : buff) {
+    if(w == null) println(str);
+    else w.println(str);
+  }
 }
 
 // general class to save distortions for particular segment
