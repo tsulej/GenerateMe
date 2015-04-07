@@ -17,3 +17,5 @@ List:
   * ntsc_analogtv - xanalogtv XScreenSaver hack ported to processing
   * slitscan - simulate errors during scanning (more digital way)
   * wzipprocess2 - recompress image using wzip method (Haar wavelet transformation)
+  * imageslicer - few algorithms based on segmentation of the image
+  
