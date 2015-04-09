@@ -9,7 +9,7 @@
 // * run
 //   * SPACE to save
 //   * click to set random settings
-//   * press 'i' for interactive mode, mouse drag starts line, short mouse movement please until you want wait loooong 
+//   * press 'i' for interactive mode, mouse click or drag starts line, short mouse movement please until you want wait loooong 
 // NOTE: small change to stroke_len, angles_no, stroke_alpha may have dramatic effect
 
 // image filename
@@ -158,6 +158,10 @@ void mouseClicked() {
     stroke_alpha = (int)random(50,200);
     reinit();
     printParameters();
+  } else {
+    currx = mouseX;
+    curry = mouseY;
+    drawMe();
   }
 }
 
