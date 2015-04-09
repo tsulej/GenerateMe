@@ -7,8 +7,9 @@
 // Usage:
 // * set image filename and parameters
 // * run
-//   * press key to save
+//   * SPACE to save
 //   * click to set random settings
+//   * press 'i' for interactive mode, mouse drag starts line, short mouse movement please until you want wait loooong 
 // NOTE: small change to stroke_len, angles_no, stroke_alpha may have dramatic effect
 
 // image filename
@@ -17,9 +18,11 @@ String filename = "test.jpg";
 int stat_type = ABSDIST2; // type of diff calculation: fast: ABSDIST, DIST, slow: HUE, SATURATION, BRIGHTNESS
 int stroke_len = 3; // length of the stroke, values: 1 and above
 int angles_no = 30; // number of directions stroke can be drew, 2 and above
-int segments = 1000; // number of segments of single thread
+int segments = 500; // number of segments of single thread
 float stroke_width = 1; // width of the stroke, 0.5 - 3
 int stroke_alpha = 100; // alpha channel of the stroke: 30 - 200 
+
+boolean interactive = false;
 
 PImage img;
 void setup() {
@@ -48,11 +51,10 @@ void reinit() {
   } 
   
   sqwidth = stroke_len * 2 + 10;
-  currstrokes = segments;
   background(255);
 }
 
-int currx, curry, currstrokes;
+int currx, curry;
 int[] sintab, costab;
 int sqwidth;
 
@@ -63,11 +65,11 @@ int calcDiff(PImage img1, PImage img2) {
   return err;  
 }
 
-void draw() {
+void drawMe() {
   //draw next 200 points using current color
   stroke(img.get(currx,curry),stroke_alpha);
   
-  for(int iter=0;iter<200;iter++) {
+  for(int iter=0;iter<segments;iter++) {
     // corners of square containing new strokes
     int corx = currx-stroke_len-5;
     int cory = curry-stroke_len-5;
@@ -117,39 +119,46 @@ void draw() {
       // next angle
       i = (i+1)%angles_no;
     }
-
-    // let's assume we renew
-    boolean renew = true;
   
     // if we have new stroke, draw it
     if(destpart != null) {
       image(destpart,corx,cory);
       currx = _nx;
       curry = _ny;
-      currstrokes--;
-      if(currstrokes>0) renew = false;
-    }
-  
-    // new startpoint
-    if(renew) {
-      currx = (int)random(width);
-      curry = (int)random(height);
-      currstrokes = segments; 
+    } else {
+      break; // skip
     }
   }
 }
 
+void draw() {
+  if(!interactive) {
+    currx = (int)random(width);
+    curry = (int)random(height);
+    drawMe();
+  }
+}
+
+void mouseDragged() {
+  if(interactive) {
+    print("+");
+    currx = mouseX;
+    curry = mouseY;
+    drawMe();
+  }
+}
+
 void mouseClicked() {
-  noLoop();
-  stat_type = random(1)<0.05?(int)random(1,4):random(1)<0.3?ABSDIST:random(1)<0.5?ABSDIST2:DIST;
-  stroke_len = (int)random(1,15);
-  angles_no = (int)random(2,50);
-  segments = (int)random(50,1500);
-  stroke_width = random(1)<0.7?1.0:random(0.5,3);
-  stroke_alpha = (int)random(50,200);
-  reinit();
-  printParameters();
-  loop(); 
+  if(!interactive) {
+    stat_type = random(1)<0.05?(int)random(1,4):random(1)<0.3?ABSDIST:random(1)<0.5?ABSDIST2:DIST;
+    stroke_len = (int)random(1,15);
+    angles_no = (int)random(2,50);
+    segments = (int)random(50,1500);
+    stroke_width = random(1)<0.7?1.0:random(0.5,3);
+    stroke_alpha = (int)random(50,200);
+    reinit();
+    printParameters();
+  }
 }
 
 void printParameters() {
@@ -173,8 +182,14 @@ void printParameters() {
 }
 
 void keyPressed() {
-  save("res_"+(int)random(10000,99999)+"_"+filename);
-  print("image saved");
+  println("");
+  if(keyCode == 32) {
+    save("res_"+(int)random(10000,99999)+"_"+filename);
+    print("image saved");
+  } else if(key == 'i') {
+    interactive = !interactive;
+    println("interactive mode: " + (interactive?"ON":"OFF"));
+  }
 }
 
 final static int DIST = 0;
