@@ -25,7 +25,7 @@ int stroke_alpha = 100; // alpha channel of the stroke: 30 - 200
 color background_color = color(255,255,255); // RGB
 
 boolean interactive = false;
-int max_image_size = 1024; // viewing window size (regardless image size)
+int max_display_size = 800; // viewing window size (regardless image size)
 
 PImage img;
 
@@ -45,11 +45,11 @@ void setup() {
   float ratio = (float)img.width/(float)img.height;
   int neww, newh;
   if(ratio < 1.0) {
-    neww = (int)(max_image_size * ratio);
-    newh = max_image_size;
+    neww = (int)(max_display_size * ratio);
+    newh = max_display_size;
   } else {
-    neww = max_image_size;
-    newh = (int)(max_image_size / ratio);
+    neww = max_display_size;
+    newh = (int)(max_display_size / ratio);
   }
 
   size(neww,newh);
