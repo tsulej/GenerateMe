@@ -16,6 +16,8 @@
 
 String imagename = "test.jpg";
 
+int max_display_size = 800; // viewing window size (regardless image size)
+
 ////////////////////////////////////////
 int type;
 int variant;
@@ -28,12 +30,31 @@ boolean doblend, doposterize;
 PImage img;
 boolean negative;
 
+// working buffer
+PGraphics buffer;
+
 void setup() {
   img = loadImage(imagename);
-  size(img.width,img.height);
-  background(0);
-  noStroke();
-  smooth(8);
+  
+  buffer = createGraphics(img.width, img.height);
+  buffer.beginDraw();
+  buffer.noStroke();
+  buffer.smooth(8);
+  buffer.background(0);
+  buffer.endDraw();  
+  
+  // calculate window size
+  float ratio = (float)img.width/(float)img.height;
+  int neww, newh;
+  if(ratio < 1.0) {
+    neww = (int)(max_display_size * ratio);
+    newh = max_display_size;
+  } else {
+    neww = max_display_size;
+    newh = (int)(max_display_size / ratio);
+  }
+
+  size(neww,newh);
   
   mouseClicked();        
 }
@@ -42,10 +63,12 @@ void draw() {}
 
 void keyPressed() {
   int r = (int)random(1000,9999);
-  save("res_"+r+"_"+imagename);
+  buffer.save("res_"+r+"_"+imagename);
+  println("image saved");
 }
 
 void mouseClicked() {
+  buffer.beginDraw();
   print("drawing... ");
   
   type=random(1)<0.5?0:1;
@@ -64,20 +87,20 @@ void mouseClicked() {
 
   float zx,zy,cx,cy;
   
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
+  for (int y = 0; y < img.height; y++) {
+    for (int x = 0; x < img.width; x++) {
       color c = img.get(x,y);
       
       if(type == 0) {
         zx = fact1*map(sqrt(getChan(chan1,c)*getChan(chan2,c)),0,1,-1,1);
         zy = fact1*map(sqrt(getChan(chan3,c)*getChan(chan4,c)),0,1,-1,1);
-        cx = map(x,0,width,-1.4,1.4);
-        cy = map(y,0,height,1.4,1.4);
+        cx = map(x,0,img.width,-1.4,1.4);
+        cy = map(y,0,img.height,1.4,1.4);
       } else {
         cx = fact1*map(sqrt(getChan(chan1,c)*getChan(chan2,c)),0,1,-1,1);
         cy = fact1*map(sqrt(getChan(chan3,c)*getChan(chan4,c)),0,1,-1,1);
-        zx = map(x,0,width,-1.4,1.4);
-        zy = map(y,0,height,-1.4,1.4);
+        zx = map(x,0,img.width,-1.4,1.4);
+        zy = map(y,0,img.height,-1.4,1.4);
       }
       
       if(variant == 0) {
@@ -101,13 +124,16 @@ void mouseClicked() {
       float c2 = order[1]==0?zx%255:order[1]==1?zy%255:51*(iter%6);
       float c3 = order[2]==0?zx%255:order[2]==1?zy%255:51*(iter%6);
       
-      fill(c1,c2,c3);
-      rect(x,y,1,1);
+      buffer.fill(c1,c2,c3);
+      buffer.rect(x,y,1,1);
     }
   }
      
- if(doblend) blend(img, 0,0,width,height,0,0,width,height,blendmethods[(int)random(blendmethods.length)]);   
- if(doposterize) filter(POSTERIZE,(int)random(3,13));   
+ if(doblend) buffer.blend(img, 0,0,img.width,img.height,0,0,img.width,img.height,blendmethods[(int)random(blendmethods.length)]);   
+ if(doposterize) buffer.filter(POSTERIZE,(int)random(3,13));   
+ 
+ buffer.endDraw();
+ image(buffer,0,0,width,height);
  
  println("done");   
 }

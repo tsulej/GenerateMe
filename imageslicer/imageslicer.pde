@@ -34,6 +34,8 @@ import java.util.Map;
 // set up filename
 String filename = "test.jpg";
 
+int max_display_size = 800; // viewing window size (regardless image size)
+
 float max_rotation = TWO_PI; // random rotation up to specified angle, 0 - TWO_PI, 0 - no rotation
 int thr_min = -1; // you can change color of segment for specified brightness threshold
 int thr_max = -1; // set to -1 if you don't want to use it, values from 0 to 255
@@ -72,11 +74,31 @@ final static int ROTATE = 2; // rotate content of the segments
 final static int SHIFTCOPY = 3; // copy content from shifted image
 final static int SORT = 4; // sort segments by color value
 
+// working buffer
+PGraphics buffer;
+
 void setup() {
   img = loadImage(filename);
-  size(img.width, img.height);
-  background(0);
-  noStroke();
+  
+  buffer = createGraphics(img.width, img.height);
+  buffer.beginDraw();
+  buffer.noStroke();
+  buffer.smooth(8);
+  buffer.background(0);
+  buffer.endDraw();
+  
+  // calculate window size
+  float ratio = (float)img.width/(float)img.height;
+  int neww, newh;
+  if(ratio < 1.0) {
+    neww = (int)(max_display_size * ratio);
+    newh = max_display_size;
+  } else {
+    neww = max_display_size;
+    newh = (int)(max_display_size / ratio);
+  }
+
+  size(neww,newh);
   
   processImage();
   processSlices();
@@ -88,7 +110,7 @@ void draw() {}
 void keyPressed() {
   if(keyCode == 32) {
     String fn = "res_"+(int)random(10000,99999)+"_"+filename;
-    saveFrame(fn);
+    buffer.save(fn);
     PrintWriter w = createWriter(fn+".txt");
       printOptions(w);
     w.flush();
@@ -208,13 +230,14 @@ void sortHelper(S segm, int x, int y) {
 }
 
 void processSlices() {
+  buffer.beginDraw();
   m.clear();
   
   if(type == PATTERNS) preparePatterns();
   
-  for(int x=0;x<width;x++)
-    for(int y=0;y<height;y++) {
-      Integer segment = findEnd(y*width+x);
+  for(int x=0;x<img.width;x++)
+    for(int y=0;y<img.height;y++) {
+      Integer segment = findEnd(y*img.width+x);
       
       S segm;
       if(m.containsKey(segment)) {
@@ -251,25 +274,25 @@ void processSlices() {
         float cosr = cos(segm.rot);
         int imgx = int(segm.pat.width+x+(cosr*vx-sinr*vy))%segm.pat.width;
         int imgy = int(segm.pat.height+x+(sinr*vx+cosr*vy))%segm.pat.height;
-        fill(segm.pat.get(imgx,imgy));
-        rect(x,y,1,1);
+        buffer.fill(segm.pat.get(imgx,imgy));
+        buffer.rect(x,y,1,1);
       } else if(type == SEPARATE) {
-        fill(segm.c);
-        rect(x+segm.dx,y+segm.dy,1,1);
+        buffer.fill(segm.c);
+        buffer.rect(x+segm.dx,y+segm.dy,1,1);
       } else if(type == SHIFTCOPY) {
-        int imgx = (2*x-segm.x)%width;
-        int imgy = (2*y-segm.y)%height;
-        fill(img.get(imgx,imgy));
-        rect(x,y,1,1);
+        int imgx = (2*x-segm.x)%img.width;
+        int imgy = (2*y-segm.y)%img.height;
+        buffer.fill(img.get(imgx,imgy));
+        buffer.rect(x,y,1,1);
       } else if(type == ROTATE) {
         int vx = segm.x-x;
         int vy = segm.y-y;
         float sinr = sin(segm.rot);
         float cosr = cos(segm.rot);
-        int imgx = int(width+x+(cosr*vx-sinr*vy))%width;
-        int imgy = int(height+y+(sinr*vx+cosr*vy))%height;
-        fill(img.get(imgx,imgy));
-        rect(x,y,1,1);
+        int imgx = int(img.width+x+(cosr*vx-sinr*vy))%img.width;
+        int imgy = int(img.height+y+(sinr*vx+cosr*vy))%img.height;
+        buffer.fill(img.get(imgx,imgy));
+        buffer.rect(x,y,1,1);
       }
     }
   
@@ -291,14 +314,17 @@ void processSlices() {
           y = (segm.positions[i] >> 16) & 0xffff;
           x = segm.positions[i] & 0xffff;
         }
-        fill(segm.clrs[i]);
-        rect(x,y,1,1);
+        buffer.fill(segm.clrs[i]);
+        buffer.rect(x,y,1,1);
       }
     }  
   }
   
   if(do_blend)
-    blend(img,0,0,img.width,img.height,0,0,width,height,blend_type);
+    buffer.blend(img,0,0,img.width,img.height,0,0,buffer.width,buffer.height,blend_type);
+    
+  buffer.endDraw();
+  image(buffer,0,0,width,height);  
 }
 
 // segmentation code START

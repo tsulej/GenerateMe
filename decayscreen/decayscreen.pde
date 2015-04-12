@@ -11,33 +11,62 @@
 
 String filename = "test.jpg";
 
+int max_display_size = 800; // viewing window size (regardless image size)
+
 //
 
+PImage img;
+
+// working buffer
+PGraphics buffer;
+
 void setup() {
-  PImage img = loadImage(filename);
-  size(img.width,img.height);
-  image(img,0,0); 
+  img = loadImage(filename);
+  
+  buffer = createGraphics(img.width, img.height);
+  buffer.image(img,0,0); 
+  
+  // calculate window size
+  float ratio = (float)img.width/(float)img.height;
+  int neww, newh;
+  if(ratio < 1.0) {
+    neww = (int)(max_display_size * ratio);
+    newh = max_display_size;
+  } else {
+    neww = max_display_size;
+    newh = (int)(max_display_size / ratio);
+  }
+
+  size(neww,newh);
   frameRate(100); 
   
   printStats();
 }
 
-boolean auto = false;
+boolean auto = true;
 
 void draw() {
+  buffer.beginDraw();
   if(auto) doDecay();
+  buffer.endDraw();
+  image(buffer,0,0,width,height);
 }
 
 boolean in = true;
 
 void mouseDragged() {
-  doBias(in,mouseX,mouseY);
+  noLoop();
+  buffer.beginDraw();
+  doBias(in,(int)map(mouseX,0,width,0,img.width),(int)map(mouseY,0,height,0,img.height));
+  buffer.endDraw();
+  image(buffer,0,0,width,height);
+  loop();
 }
 
 void keyPressed() {
   if(key == 'i') in = !in;
   if(keyCode == RETURN || keyCode == ENTER) auto = !auto;
-  if(keyCode == 32) { saveFrame("res_"+(int)random(10000,99999)+"_"+filename); print("saved... "); };
+  if(keyCode == 32) { buffer.save("res_"+(int)random(10000,99999)+"_"+filename); print("saved... "); };
   printStats();
 }
 
@@ -77,10 +106,10 @@ static final int[][] bias = {
 };
 
 void doBias(boolean in, int mx, int my) {
-  int left = (int)random(width-1);
-  int top = (int)random(height);
-  int w = (int)random(width-left);
-  int h = (int)random(height-top);
+  int left = (int)random(img.width-1);
+  int top = (int)random(img.height);
+  int w = (int)random(img.width-left);
+  int h = (int)random(img.height-top);
   int toleft = left;
   int totop = top;
   
@@ -106,15 +135,15 @@ void doBias(boolean in, int mx, int my) {
     default: {toleft = left-1; totop=top+1;}break;
   }
   
-  PImage img = get(left,top,w,h);
-  image(img,toleft,totop);
+  PImage timg = buffer.get(left,top,w,h);
+  buffer.image(timg,toleft,totop);
 }
 
 void doBias() {
-  int left = (int)random(width-1);
-  int top = (int)random(height);
-  int w = (int)random(width-left);
-  int h = (int)random(height-top);
+  int left = (int)random(img.width-1);
+  int top = (int)random(img.height);
+  int w = (int)random(img.width-left);
+  int h = (int)random(img.height-top);
   int toleft = left;
   int totop = top;
   
@@ -126,21 +155,21 @@ void doBias() {
     default: {toleft = left-1; totop=top+1;}break;
   }
   
-  PImage img = get(left,top,w,h);
-  image(img,toleft,totop); 
+  PImage timg = buffer.get(left,top,w,h);
+  buffer.image(timg,toleft,totop); 
 }
 
 boolean fuzz_toggle = true;
 void doFuzz() {
-  int left = (int)random(width-1);
-  int top = (int)random(height-1);
+  int left = (int)random(img.width-1);
+  int top = (int)random(img.height-1);
   int h,w,totop,toleft;
   
   // bad code, bad... 
   if(fuzz_toggle) {
     totop = top;
     h = 1;
-    toleft = (int)random(width-1);
+    toleft = (int)random(img.width-1);
     if(toleft>left) {
       w = toleft-left;
       toleft = left;
@@ -153,7 +182,7 @@ void doFuzz() {
   } else {
     toleft = left;
     w = 1;
-    totop = (int)random(height-1);
+    totop = (int)random(img.height-1);
     if(totop>top) {
       h = totop-top;
       totop = top;
@@ -166,36 +195,36 @@ void doFuzz() {
   }
   fuzz_toggle = !fuzz_toggle;
   
-  PImage img = get(left,top,w,h);
-  image(img,toleft,totop);  
+  PImage timg = buffer.get(left,top,w,h);
+  buffer.image(timg,toleft,totop);  
 }
 
 void doStretchV() {
-  int top = (int)random(height);
+  int top = (int)random(img.height);
 
-  PImage img = get(0,height-top-2,width,top+1);
-  image(img,0,height-top-1);
+  PImage timg = buffer.get(0,img.height-top-2,img.width,top+1);
+  buffer.image(timg,0,img.height-top-1);
 }
 
 void doSqueezeV() {
-  int top = (int)random(height);
+  int top = (int)random(img.height);
 
-  PImage img = get(0,height-top-1,width,top+1);
-  image(img,0,height-top-2);
+  PImage timg = buffer.get(0,img.height-top-1,img.width,top+1);
+  buffer.image(timg,0,img.height-top-2);
 }
 
 void doStretchH() {
-  int left = (int)random(width);
+  int left = (int)random(img.width);
 
-  PImage img = get(width-left-2,0,left+1,height);
-  image(img,width-left-1,0);
+  PImage timg = buffer.get(img.width-left-2,0,left+1,img.height);
+  buffer.image(timg,img.width-left-1,0);
 }
 
 void doSqueezeH() {
-  int left = (int)random(width);
+  int left = (int)random(img.width);
 
-  PImage img = get(width-left-1,0,left+1,height);
-  image(img,width-left-2,0);
+  PImage timg = buffer.get(img.width-left-1,0,left+1,img.height);
+  buffer.image(timg,img.width-left-2,0);
 }
 
 /*
