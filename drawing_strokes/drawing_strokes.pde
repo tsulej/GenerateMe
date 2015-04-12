@@ -22,25 +22,50 @@ int segments = 500; // number of segments of single thread
 float stroke_width = 1; // width of the stroke, 0.5 - 3
 int stroke_alpha = 100; // alpha channel of the stroke: 30 - 200 
 
+color background_color = color(255,255,255); // RGB
+
 boolean interactive = false;
+int max_image_size = 1024; // viewing window size (regardless image size)
 
 PImage img;
+
+// working buffer
+PGraphics buffer;
+
 void setup() {
   img = loadImage(filename);
-  size(img.width,img.height);
   
-  noFill();
-  smooth(8);
+  buffer = createGraphics(img.width, img.height);
+  buffer.beginDraw();
+  buffer.noFill();
+  buffer.smooth(8);
+  buffer.endDraw();
+  
+  // calculate window size
+  float ratio = (float)img.width/(float)img.height;
+  int neww, newh;
+  if(ratio < 1.0) {
+    neww = (int)(max_image_size * ratio);
+    newh = max_image_size;
+  } else {
+    neww = max_image_size;
+    newh = (int)(max_image_size / ratio);
+  }
+
+  size(neww,newh);
  
   reinit();
   printParameters();
 }
 
 void reinit() {
-  strokeWeight(stroke_width);
+  buffer.beginDraw();
+  buffer.strokeWeight(stroke_width);
+  buffer.background(background_color);
+  buffer.endDraw();
   
-  currx = (int)random(width);
-  curry = (int)random(height); 
+  currx = (int)random(img.width);
+  curry = (int)random(img.height); 
  
   sintab = new int[angles_no];
   costab = new int[angles_no];
@@ -50,8 +75,7 @@ void reinit() {
     costab[i] = (int)(stroke_len * cos(TWO_PI*i/(float)angles_no));
   } 
   
-  sqwidth = stroke_len * 2 + 10;
-  background(255);
+  sqwidth = stroke_len * 2 + 4;
 }
 
 int currx, curry;
@@ -66,17 +90,18 @@ int calcDiff(PImage img1, PImage img2) {
 }
 
 void drawMe() {
-  //draw next 200 points using current color
-  stroke(img.get(currx,curry),stroke_alpha);
+  buffer.beginDraw();
+  //draw whole segment using current color
+  buffer.stroke(img.get(currx,curry),stroke_alpha);
   
   for(int iter=0;iter<segments;iter++) {
     // corners of square containing new strokes
-    int corx = currx-stroke_len-5;
-    int cory = curry-stroke_len-5;
+    int corx = currx-stroke_len-2;
+    int cory = curry-stroke_len-2;
   
     // take square from image and current screen
     PImage imgpart = img.get(corx,cory,sqwidth,sqwidth);
-    PImage mypart = get(corx,cory,sqwidth,sqwidth);
+    PImage mypart = buffer.get(corx,cory,sqwidth,sqwidth);
     imgpart.loadPixels();
     mypart.loadPixels();
     
@@ -97,13 +122,13 @@ void drawMe() {
       int ny = curry + sintab[i];
      
       // if not out of the screen
-      if(nx>=0 && nx<width-1 && ny>=0 && ny<height-1) {
+      if(nx>=0 && nx<img.width-1 && ny>=0 && ny<img.height-1) {
         // clean region and draw line
-        image(mypart,corx,cory);
-        line(currx,curry,nx,ny);
+        buffer.image(mypart,corx,cory);
+        buffer.line(currx,curry,nx,ny);
       
         // take region with line and calc diff
-        PImage curr = get(corx,cory,sqwidth,sqwidth);
+        PImage curr = buffer.get(corx,cory,sqwidth,sqwidth);
         curr.loadPixels();
         int currerr = calcDiff(imgpart,curr);
         
@@ -122,19 +147,22 @@ void drawMe() {
   
     // if we have new stroke, draw it
     if(destpart != null) {
-      image(destpart,corx,cory);
+      buffer.image(destpart,corx,cory);
       currx = _nx;
       curry = _ny;
     } else {
       break; // skip
     }
   }
+  
+  buffer.endDraw();
+  image(buffer,0,0,width,height);
 }
 
 void draw() {
   if(!interactive) {
-    currx = (int)random(width);
-    curry = (int)random(height);
+    currx = (int)random(img.width);
+    curry = (int)random(img.height);
     drawMe();
   }
 }
@@ -142,8 +170,8 @@ void draw() {
 void mouseDragged() {
   if(interactive) {
     print("+");
-    currx = mouseX;
-    curry = mouseY;
+    currx = (int)map(mouseX,0,width,0,img.width);
+    curry = (int)map(mouseY,0,height,0,img.height);
     drawMe();
   }
 }
@@ -159,9 +187,7 @@ void mouseClicked() {
     reinit();
     printParameters();
   } else {
-    currx = mouseX;
-    curry = mouseY;
-    drawMe();
+    mouseDragged();
   }
 }
 
@@ -188,7 +214,7 @@ void printParameters() {
 void keyPressed() {
   println("");
   if(keyCode == 32) {
-    save("res_"+(int)random(10000,99999)+"_"+filename);
+    buffer.save("res_"+(int)random(10000,99999)+"_"+filename);
     print("image saved");
   } else if(key == 'i') {
     interactive = !interactive;
