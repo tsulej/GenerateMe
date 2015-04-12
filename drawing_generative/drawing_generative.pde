@@ -10,6 +10,8 @@ int channel = HUE;
  
 // run, after 30 iterations result will be saved automatically
 // or click mouse when ready
+
+int max_display_size = 800; // viewing window size (regardless image size)
  
 /////////////////////////////////////
 
@@ -34,29 +36,51 @@ float [] cy=new float[n];
 PImage img;
 int len;
  
+// working buffer
+PGraphics buffer; 
+ 
 void setup() {
   img = loadImage(imagefilename);
   
-  size(img.width,img.height);
-  len = (width<height?width:height)/6;
+  buffer = createGraphics(img.width, img.height);
+  buffer.beginDraw();
+  buffer.noFill();
+  buffer.smooth(8);
+  buffer.strokeWeight(0.3);
+  buffer.background(0);
+  buffer.endDraw();
+  
+  // calculate window size
+  float ratio = (float)img.width/(float)img.height;
+  int neww, newh;
+  if(ratio < 1.0) {
+    neww = (int)(max_display_size * ratio);
+    newh = max_display_size;
+  } else {
+    neww = max_display_size;
+    newh = (int)(max_display_size / ratio);
+  }
+
+  size(neww,newh);
+  
+  len = (img.width<img.height?img.width:img.height)/6;
   
   background(0);
   for (int i=0;i<n;i++) {
-    cx[i]=random(width);
-    cy[i]=random(height);
+    cx[i]=random(img.width);
+    cy[i]=random(img.height);
   }
-  
-  smooth(8);
-  strokeWeight(0.3);
+
 }
  
 int tick = 0;
  
 void draw() {  
+  buffer.beginDraw();
   for (int i=1;i<n;i++) {
     color c = img.get((int)cx[i], (int)cy[i]);
-    stroke(c);
-    point(cx[i], cy[i]);
+    buffer.stroke(c);
+    buffer.point(cx[i], cy[i]);
     // you can choose channels: red(c), blue(c), green(c), hue(c), saturation(c) or brightness(c)
     cy[i]+=sin(map(getChannel(c),0,255,0,TWO_PI));
     cx[i]+=cos(map(getChannel(c),0,255,0,TWO_PI));
@@ -66,12 +90,16 @@ void draw() {
     frameCount=0;
     println("iteration: " + tick++);
     for (int i=0;i<n;i++) {
-      cx[i]=random(width);
-      cy[i]=random(height);
+      cx[i]=random(img.width);
+      cy[i]=random(img.height);
     }
     
-    if(tick == 30) saveFrame("res_"+(int)random(10000,99999)+"_"+imagefilename);
   }
+  
+  buffer.endDraw();
+  if(tick == 30) buffer.save("res_"+(int)random(10000,99999)+"_"+imagefilename);
+  
+  image(buffer,0,0,width,height);
 }
  
 float getChannel(color c) {
@@ -91,5 +119,6 @@ float getChannel(color c) {
 }
   
 void mouseClicked() {
-  saveFrame("res_"+(int)random(10000,99999)+"_"+imagefilename);
+  buffer.save("res_"+(int)random(10000,99999)+"_"+imagefilename);
+  println("image saved");
 }
