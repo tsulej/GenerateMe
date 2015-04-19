@@ -3,13 +3,15 @@
 // Licence CC-BY-SA 3.0
  
 // put image filename here:
-String imagefilename = "test.jpg";
+String filename = "test";
+String fileext = ".jpg";
+String foldername = "./";
  
 // choose channel  
 int channel = HUE; 
  
 // run, after 30 iterations result will be saved automatically
-// or click mouse when ready
+// or press SPACE
 
 int max_display_size = 800; // viewing window size (regardless image size)
  
@@ -39,8 +41,11 @@ int len;
 // working buffer
 PGraphics buffer; 
  
+String sessionid; 
+ 
 void setup() {
-  img = loadImage(imagefilename);
+  sessionid = hex((int)random(0xffff),4);
+  img = loadImage(foldername+filename+fileext);
   
   buffer = createGraphics(img.width, img.height);
   buffer.beginDraw();
@@ -97,7 +102,7 @@ void draw() {
   }
   
   buffer.endDraw();
-  if(tick == 30) buffer.save("res_"+(int)random(10000,99999)+"_"+imagefilename);
+  if(tick == 30) keyPressed();
   
   image(buffer,0,0,width,height);
 }
@@ -118,7 +123,7 @@ float getChannel(color c) {
   return channel>5?255-cc:cc;
 }
   
-void mouseClicked() {
-  buffer.save("res_"+(int)random(10000,99999)+"_"+imagefilename);
+void keyPressed() {
+  buffer.save(foldername + filename + "/res_" + sessionid + hex((int)random(0xffff),4)+"_"+filename+fileext);
   println("image saved");
 }

@@ -26,8 +26,11 @@ import generateme.analogtv.*;
 
 // CONFIGURATION BEGIN
 
-String imagename = "test.jpg"; // should have 4:3 ratio
-//String secondimage = "people.jpg"; // if you want to mix with second image, put its name here
+String filename = "test"; // should have 4:3 ratio
+String fileext = ".jpg";
+String foldername = "./";
+
+//String secondimage = "people.jpg"; // if you want to mix with second image, put its name here, full path here
 String secondimage = null;
 
 // General settings
@@ -70,11 +73,13 @@ TV tv;
 Reception rec1; // image
 Reception rec2; // noise
 
+String sessionid;
+
 void setup() {
+  sessionid = hex((int)random(0xffff),4);
   size(W,3*W/4);
   background(0);
   noStroke();
-  seed = "_" + (int)random(10000,99999);
   
   tv = new TV(this, width, height);
   tv.powerup = POWERUP;
@@ -106,7 +111,7 @@ void reset() {
   rec1.hfloss2 = HFLOSS2;
   rec1.do_hfloss2 = DO_HFLOSS2;
   tv.setup_sync(rec1.signal,COLOR_SYNC, DISABLE_SYNC);
-  tv.set_image(rec1.signal,loadImage(imagename));
+  tv.set_image(rec1.signal,loadImage(foldername+filename+fileext));
   if(TELETEXT) tv.setup_teletext(rec1.signal);
  
   rec2 = new Reception(this);
@@ -144,7 +149,7 @@ void randomize() {
   rec1.hfloss2 = random(-2,5);
   rec1.do_hfloss2 = random(1)<0.2?true:false;
   tv.setup_sync(rec1.signal,random(1)<0.8, random(1)<0.2);
-  if(random(1)<0.9) tv.set_image(rec1.signal,loadImage(imagename));
+  if(random(1)<0.9) tv.set_image(rec1.signal,loadImage(foldername+filename+fileext));
   if(random(1)<0.5) tv.setup_teletext(rec1.signal);
  
   rec2 = new Reception(this);
@@ -154,7 +159,7 @@ void randomize() {
     tv.set_image(rec2.signal,loadImage(secondimage));
     if(random(1)<0.5) tv.setup_teletext(rec2.signal);
   } else if(random(1)<0.3)
-    tv.set_image(rec2.signal,loadImage(imagename));
+    tv.set_image(rec2.signal,loadImage(foldername+filename+fileext));
   
   tv.clear_receptions();
   boolean onlynoise = random(1)<0.2;
@@ -178,13 +183,12 @@ void mousePressed() {
   randomize();
 }
 
-String seed = "_12345";
 void keyPressed() {
   noLoop();
   switch(keyCode) {
     case ENTER: reset(); break;
     case RETURN: reset(); break;
-    case 32: saveFrame("frame_"+frameCount+seed+".png");
+    case 32: saveFrame(foldername + filename + "/res_" + sessionid + hex((int)random(0xffff),4)+"_"+filename+fileext);
     default: break;
   }
   loop(); 

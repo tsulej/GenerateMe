@@ -9,7 +9,9 @@
 //        ENTER - to decay automaticly
 // drag clicked mouse to decay in or out
 
-String filename = "test.jpg";
+String filename = "test";
+String fileext = ".jpg";
+String foldername = "./";
 
 int max_display_size = 800; // viewing window size (regardless image size)
 
@@ -20,8 +22,11 @@ PImage img;
 // working buffer
 PGraphics buffer;
 
+String sessionid;
+
 void setup() {
-  img = loadImage(filename);
+  sessionid = hex((int)random(0xffff),4);
+  img = loadImage(foldername+filename+fileext);
   
   buffer = createGraphics(img.width, img.height);
   buffer.image(img,0,0); 
@@ -66,7 +71,7 @@ void mouseDragged() {
 void keyPressed() {
   if(key == 'i') in = !in;
   if(keyCode == RETURN || keyCode == ENTER) auto = !auto;
-  if(keyCode == 32) { buffer.save("res_"+(int)random(10000,99999)+"_"+filename); print("saved... "); };
+  if(keyCode == 32) { buffer.save(foldername + filename + "/res_" + sessionid + hex((int)random(0xffff),4)+"_"+filename+fileext); print("saved... "); };
   printStats();
 }
 

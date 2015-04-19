@@ -9,8 +9,14 @@
 // * press SPACE to toggle between RGBRGB... (HSBHSB...) or RRR...GGG...BBB... (HHH...SSS...BBB...) raws
 // * click to save
 
-String filename = "test.jpg"; // file name of your raw
-boolean do_hsb = true; // do operate on HSB channels
+// filename
+String filename = "test";
+String fileext = ".jpg";
+String foldername = "./";
+
+int max_display_size = 800; // viewing window size (regardless image size)
+
+boolean do_hsb = false; // do operate on HSB channels
 
 // logic below
 
@@ -27,11 +33,35 @@ int n,n2,s;
 boolean option1 = true;
 float sc = 160;
 
+PImage img;
+
+// working buffer
+PGraphics buffer;
+
+String sessionid;
+
 void setup() {
-  PImage img = loadImage(filename);
-  size(img.width, img.height);
-  noStroke();
-  background(0);
+  sessionid = hex((int)random(0xffff),4);
+  img = loadImage(foldername+filename+fileext);
+  
+  buffer = createGraphics(img.width, img.height);
+  buffer.beginDraw();
+  buffer.background(0);
+  buffer.noStroke();
+  buffer.endDraw(); 
+  
+  // calculate window size
+  float ratio = (float)img.width/(float)img.height;
+  int neww, newh;
+  if(ratio < 1.0) {
+    neww = (int)(max_display_size * ratio);
+    newh = max_display_size;
+  } else {
+    neww = max_display_size;
+    newh = (int)(max_display_size / ratio);
+  }
+
+  size(neww,newh);
   
   s = img.width*img.height;
   raw = new float[s*3];
@@ -43,8 +73,8 @@ void setup() {
   
   int iter=0;
   int iter2 = 0;
-  for(int y=0;y<height;y++) {
-    for(int x=0;x<width;x++) {
+  for(int y=0;y<img.height;y++) {
+    for(int x=0;x<img.width;x++) {
       color c = img.get(x,y);
       float r,g,b;
       if(do_hsb) {
@@ -115,8 +145,8 @@ void option2() {
     float r = clamp(out1[i]);
     float g = clamp(out2[i]);
     float b = clamp(out3[i]);
-    fill(r,g,b);
-    rect(i%width,i/width,1,1); 
+    buffer.fill(r,g,b);
+    buffer.rect(i%img.width,i/img.width,1,1); 
   }
   
 }
@@ -136,8 +166,8 @@ void option1() {
       case 2: b = c; break;
       default: {
         r = c;
-        fill(r,g,b);
-        rect(floor(i/3.0)%width,floor(i/3.0)/width,1,1);
+        buffer.fill(r,g,b);
+        buffer.rect(floor(i/3.0)%img.width,floor(i/3.0)/img.width,1,1);
         state = 0;
       }
     }
@@ -146,11 +176,15 @@ void option1() {
 }
 
 void draw() {
+  buffer.beginDraw();
   scalingfactorin = map(mouseX,0,width,0,sc);
   scalingfactorout = map(mouseY,0,height,0,sc);
   
   if(option1) option1();
   else option2();  
+  
+  buffer.endDraw();
+  image(buffer,0,0,width,height);
 }
 
 void printOption() {
@@ -184,7 +218,7 @@ void keyPressed() {
 }
 
 void mouseClicked() {
-  saveFrame("res_####_" + filename);
+  buffer.save(foldername + filename + "/res_" + sessionid + hex((int)random(0xffff),4)+"_"+filename+fileext);
   println("image saved");
 }
 
