@@ -13,7 +13,9 @@
 // NOTE: small change to stroke_len, angles_no, stroke_alpha may have dramatic effect
 
 // image filename
-String filename = "test.jpg";
+String filename = "test";
+String fileext = ".jpg";
+String foldername = "./";
 
 int stat_type = ABSDIST2; // type of diff calculation: fast: ABSDIST, DIST, slow: HUE, SATURATION, BRIGHTNESS
 int stroke_len = 3; // length of the stroke, values: 1 and above
@@ -32,8 +34,11 @@ PImage img;
 // working buffer
 PGraphics buffer;
 
+String sessionid;
+
 void setup() {
-  img = loadImage(filename);
+  sessionid = hex((int)random(0xffff),4);
+  img = loadImage(foldername+filename+fileext);
   
   buffer = createGraphics(img.width, img.height);
   buffer.beginDraw();
@@ -214,7 +219,7 @@ void printParameters() {
 void keyPressed() {
   println("");
   if(keyCode == 32) {
-    buffer.save("res_"+(int)random(10000,99999)+"_"+filename);
+    buffer.save(foldername + filename + "/res_" + sessionid + hex((int)random(0xffff),4)+"_"+filename+fileext);
     print("image saved");
   } else if(key == 'i') {
     interactive = !interactive;

@@ -14,7 +14,9 @@
  
 // yes, it's rather slow 
 
-String imagename = "test.jpg";
+String filename = "test";
+String fileext = ".jpg";
+String foldername = "./";
 
 int max_display_size = 800; // viewing window size (regardless image size)
 
@@ -33,8 +35,11 @@ boolean negative;
 // working buffer
 PGraphics buffer;
 
+String sessionid;
+
 void setup() {
-  img = loadImage(imagename);
+  sessionid = hex((int)random(0xffff),4);
+  img = loadImage(foldername+filename+fileext);
   
   buffer = createGraphics(img.width, img.height);
   buffer.beginDraw();
@@ -62,8 +67,7 @@ void setup() {
 void draw() {}
 
 void keyPressed() {
-  int r = (int)random(1000,9999);
-  buffer.save("res_"+r+"_"+imagename);
+  buffer.save(foldername + filename + "/res_" + sessionid + hex((int)random(0xffff),4)+"_"+filename+fileext);
   println("image saved");
 }
 

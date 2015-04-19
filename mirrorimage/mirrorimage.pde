@@ -23,7 +23,11 @@
 //   SPACE to save
 
 // filename here:
-String filename = "test.jpg";
+String filename = "test";
+String fileext = ".jpg";
+String foldername = "./";
+
+int max_display_size = 800; // viewing window size (regardless image size)
 
 // actions here (comma separated in curly braces):
 int[] order = { UL, L, DL };
@@ -70,22 +74,47 @@ int tx,ty;
 
 PImage img;
 
-void setup() { //<>//
-  img = loadImage(filename);
-  size(img.width,img.height);
-  image(img,0,0);
-  noStroke();
+// working buffer
+PGraphics buffer;
+
+String sessionid;
+
+void setup() {
+  sessionid = hex((int)random(0xffff),4);
+  img = loadImage(foldername+filename+fileext);
   
-  size = width<height?width:height;
+  buffer = createGraphics(img.width, img.height);
+  buffer.beginDraw();
+  buffer.image(img,0,0);
+  buffer.noStroke();
+  buffer.endDraw(); 
+  
+  // calculate window size
+  float ratio = (float)img.width/(float)img.height;
+  int neww, newh;
+  if(ratio < 1.0) {
+    neww = (int)(max_display_size * ratio);
+    newh = max_display_size;
+  } else {
+    neww = max_display_size;
+    newh = (int)(max_display_size / ratio);
+  }
+
+  size(neww,newh); 
+  //<>//
+  size = img.width<img.height?img.width:img.height;
   
   tx=ty=0;
-  if(width>size) tx = width-size;
-  if(height>size) ty = height-size;
+  if(img.width>size) tx = img.width-size;
+  if(img.height>size) ty = img.height-size;
+  
+  image(buffer,0,0,width,height);
 }
 
 void draw() {}
 
 void mouseClicked() {
+  buffer.beginDraw();
   if(automatic) {
     int n = (int)random(1,16);
     order = new int[n];
@@ -93,12 +122,18 @@ void mouseClicked() {
   }
   
   for(int i=0;i<order.length;i++) doMirror(order[i]);
-    
+  buffer.endDraw();
+  image(buffer,0,0,width,height);  
 }
 
 void keyPressed() {
-  if(keyCode == ENTER || keyCode == RETURN) image(img,0,0);
-  if(keyCode == 32) saveFrame("res_"+(int)random(10000,99999)+"_"+filename);
+  if(keyCode == ENTER || keyCode == RETURN) {
+    buffer.beginDraw();
+    buffer.image(img,0,0);
+    buffer.endDraw();
+    image(buffer,0,0,width,height);
+  }
+  if(keyCode == 32) buffer.save(foldername + filename + "/res_" + sessionid + hex((int)random(0xffff),4)+"_"+filename+fileext);
 }
 
 void doMirror(int type) {
@@ -128,6 +163,7 @@ void doMirror(int type) {
     case RUR: doDiagRRect(true); break;
     case RDR: doDiagRRect(false); break;
   }
+  
 }
 
 void doDiagUL(int type, boolean shift) {
@@ -155,36 +191,36 @@ void doDiagUR(int type, boolean shift) {
 }
 
 void doHorizontal(boolean type) {
-  for(int y=0;y<height/2;y++)
-    for(int x=0;x<width;x++)
-      if(type) drawPoint(x,y,x,height-y-1,false);
-      else     drawPoint(x,height-y-1,x,y,false);
+  for(int y=0;y<img.height/2;y++)
+    for(int x=0;x<img.width;x++)
+      if(type) drawPoint(x,y,x,img.height-y-1,false);
+      else     drawPoint(x,img.height-y-1,x,y,false);
 }
 
 void doVertical(boolean type) {
-  for(int x=0;x<width/2;x++)
-    for(int y=0;y<height;y++)
-      if(type) drawPoint(x,y,width-x-1,y,false);
-      else     drawPoint(width-x-1,y,x,y,false);
+  for(int x=0;x<img.width/2;x++)
+    for(int y=0;y<img.height;y++)
+      if(type) drawPoint(x,y,img.width-x-1,y,false);
+      else     drawPoint(img.width-x-1,y,x,y,false);
 }
 
 void doDiagLRect(boolean m) {
-  for(int y=0;y<height;y++) {
-    int d = m?(int)map(y,0,height,0,width):(int)map(y,0,height-1,width-1,0);
+  for(int y=0;y<img.height;y++) {
+    int d = m?(int)map(y,0,img.height,0,img.width):(int)map(y,0,img.height,img.width,0);
     for(int x=0;x<d;x++) {
-      fill(get(x,y));
-      rect(width-x-1,height-y-1,1,1);
+      buffer.fill(buffer.get(x,y));
+      buffer.rect(img.width-x-1,img.height-y-1,1,1);
     }
   }
 }
 
 
 void doDiagRRect(boolean m) {
-  for(int y=0;y<height;y++) {
-    int d = m?(int)map(y,0,height,0,width):(int)map(y,0,height-1,width-1,0);
+  for(int y=0;y<img.height;y++) {
+    int d = m?(int)map(y,0,img.height,0,img.width):(int)map(y,0,img.height,img.width,0);
     for(int x=0;x<d;x++) {
-      fill(get(width-x-1,height-y-1));
-      rect(x,y,1,1);
+      buffer.fill(buffer.get(img.width-x-1,img.height-y-1));
+      buffer.rect(x,y,1,1);
     }
   }
 }
@@ -195,6 +231,6 @@ void drawPoint(int oldx, int oldy, int newx, int newy, boolean shift) {
   int sy=0;
   if(shift) { sx = tx; sy = ty; } // fucking rectangles...
   
-  fill(get(oldx+sx,oldy+sy));
-  rect(newx+sx,newy+sy,1,1);
+  buffer.fill(buffer.get(oldx+sx,oldy+sy));
+  buffer.rect(newx+sx,newy+sy,1,1);
 }

@@ -32,7 +32,9 @@ import java.util.Arrays;
 import java.util.Map;
 
 // set up filename
-String filename = "test.jpg";
+String filename = "test";
+String fileext = ".jpg";
+String foldername = "./";
 
 int max_display_size = 800; // viewing window size (regardless image size)
 
@@ -77,8 +79,11 @@ final static int SORT = 4; // sort segments by color value
 // working buffer
 PGraphics buffer;
 
+String sessionid;
+
 void setup() {
-  img = loadImage(filename);
+  sessionid = hex((int)random(0xffff),4);
+  img = loadImage(foldername+filename+fileext);
   
   buffer = createGraphics(img.width, img.height);
   buffer.beginDraw();
@@ -109,7 +114,7 @@ void draw() {}
 
 void keyPressed() {
   if(keyCode == 32) {
-    String fn = "res_"+(int)random(10000,99999)+"_"+filename;
+    String fn = foldername + filename + "/res_" + sessionid + hex((int)random(0xffff),4)+"_"+filename+fileext;
     buffer.save(fn);
     PrintWriter w = createWriter(fn+".txt");
       printOptions(w);

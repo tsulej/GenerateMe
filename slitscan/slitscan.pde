@@ -10,7 +10,11 @@
 // sometimes it copies the image, I don't know why, ignore and click more
 
 // put file name here
-String filename = "test.jpg"; 
+String filename = "test";
+String fileext = ".jpg";
+String foldername = "./";
+
+int max_display_size = 800; // viewing window size (regardless image size)
    
 // logic starts here   
 int[] fx;
@@ -32,25 +36,48 @@ float[][] ft = new float[2][32];
   
 int depth; // number of octaves  
   
+// working buffer
+PGraphics buffer;
+
+String sessionid;
+
 void setup() {
-  img = loadImage(filename);
-  size(img.width,img.height);
-  noStroke();
-  fill(255);
-  background(0);
+  sessionid = hex((int)random(0xffff),4);
+  img = loadImage(foldername+filename+fileext);
+  
+  buffer = createGraphics(img.width, img.height);
+  buffer.beginDraw();
+  buffer.noStroke();
+  buffer.fill(255);
+  buffer.background(0);
+  buffer.endDraw(); 
+  
+  // calculate window size
+  float ratio = (float)img.width/(float)img.height;
+  int neww, newh;
+  if(ratio < 1.0) {
+    neww = (int)(max_display_size * ratio);
+    newh = max_display_size;
+  } else {
+    neww = max_display_size;
+    newh = (int)(max_display_size / ratio);
+  }
+
+  size(neww,newh);
  
   for(int i=0;i<32;i++) {
     ft[0][i] = pow(2.0,i);
     ft[1][i] = 0.5*1.0/ft[0][i];
   }
 
-  int s = width>height?height:width;
+  int s = img.width>img.height?img.height:img.width;
   depth = (int)(log(s)/log(2));
 
   mouseClicked();
 }
 
 void mouseClicked() {
+  buffer.beginDraw();
   int fxnum = (int)random(depth);
   int fynum = (int)random(depth);
    
@@ -82,33 +109,37 @@ void mouseClicked() {
   doy = dox?random(1)<0.8:true;
    
   float v=0;
-  for(int y=0;y<height;y++)
-  for(int x=0;x<width;x++) {
-    float iy = map(y,0,height,0,1);
+  for(int y=0;y<img.height;y++)
+  for(int x=0;x<img.width;x++) {
+    float iy = map(y,0,img.height,0,1);
    
     v=0;
     if(doy) for(int i=0;i<fy.length;i++)
        if(!skipfy[i]) v+=sy[i]*getValue(fy[i],iy,i,phy[i]); 
     
     float ry = 2*iy+v;
-    float y2 = (3*height+ry * height/2)%height;  
+    float y2 = (3*img.height+ry * img.height/2)%img.height;  
      
-    float ix = map(x,0,width,0,1);
+    float ix = map(x,0,img.width,0,1);
     v=0;
     if(dox) for(int i=0;i<fx.length;i++)
        if(!skipfx[i]) v+=sx[i]*getValue(fx[i],ix,i,phx[i]); 
      
     
     float rx = 2*ix+v;
-    float x2 = (3*width+rx * width/2)%width;   
+    float x2 = (3*img.width+rx * img.width/2)%img.width;   
      
-    fill(img.get((int)x2,(int)y2)); 
-    rect(x,y,1,1);
+    buffer.fill(img.get((int)x2,(int)y2)); 
+    buffer.rect(x,y,1,1);
   } 
+  
+  buffer.endDraw();
+  image(buffer,0,0,width,height);
 }
 
 void keyPressed() {
-  save("res_"+(int)random(10000,99999)+"_"+filename);
+  buffer.save(foldername + filename + "/res_" + sessionid + hex((int)random(0xffff),4)+"_"+filename+fileext);
+  println("saved");
 }
 
 void draw() {}

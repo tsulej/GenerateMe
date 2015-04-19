@@ -21,9 +21,14 @@
 //       find line with fill(n) - there are hidden other options as a comments
 
 // filename
-String filename = "test.jpg"; // image to process 
-String lensfilename = null; // use different image to use as lens (null = use same as image to process)
-//String lensfilename = "lens1.jpg"; 
+String filename = "test"; // image to process
+String fileext = ".jpg";
+String foldername = "./";
+
+String lensfilename = null; // use different image to use as lens (null = use same as image to process), full path please!
+//String lensfilename = "./lens1.jpg"; 
+
+int max_display_size = 800; // viewing window size (regardless image size)
 
 // set to true to use colour lovers random pattern
 // http://www.colourlovers.com/patterns
@@ -69,28 +74,14 @@ boolean interactive = false; // move mouse to set bend when active, ENTER to act
 
 float[] facts = new float[2];
 
-void getCLPattern() {
-  int n = (int)random(1,4719052);
-  print("Loading pattern from ColourLovers number: "+n+"...");
-  
-  String pad="";
-  if(n<1000) pad = "0";
-  else {
-    String nn = ""+n;
-    pad = nn.substring(0,nn.length()-3);
-  }
-  
-  String clname = "http://colourlovers.com.s3.amazonaws.com/images/patterns/"+pad+"/"+n+".png";
-  try {
-    limg = loadImage(clname, "png");
-  } catch(Exception e) {
-    getCLPattern();
-  }	
-  println(" done");
-}
+// working buffer
+PGraphics buffer;
+
+String sessionid;
 
 void setup() {
-  img = loadImage(filename);
+  sessionid = hex((int)random(0xffff),4);
+  img = loadImage(foldername+filename+fileext);
   img.loadPixels();
   
   if(lensfilename != null) {
@@ -99,13 +90,28 @@ void setup() {
   } else 
     limg=img;
   
-  size(img.width,img.height);
-  noStroke();
+  buffer = createGraphics(img.width, img.height);
+  buffer.beginDraw();
+  buffer.noStroke();
+  buffer.endDraw(); 
+  
+  // calculate window size
+  float ratio = (float)img.width/(float)img.height;
+  int neww, newh;
+  if(ratio < 1.0) {
+    neww = (int)(max_display_size * ratio);
+    newh = max_display_size;
+  } else {
+    neww = max_display_size;
+    newh = (int)(max_display_size / ratio);
+  }
+
+  size(neww,newh);
 
   if(use_clpattern) getCLPattern();
 
-  facts[0] = bendx * width;
-  facts[1] = bendy * height;
+  facts[0] = bendx * img.width;
+  facts[1] = bendy * img.height;
 
   drawMe();
 }
@@ -147,31 +153,43 @@ int getShift(color c, int idx) {
 }
 
 void drawMe() {
-    background(0);
+    buffer.beginDraw();
+    buffer.background(0);
 
-    for(int x=0;x<width;x++) {
-      int lx = ((int)(x*pattern_factor))%limg.width;
-      for(int y=0;y<height;y++) {
-        int ly = ((int)(y*pattern_factor))%limg.height;
+    for(int x=0;x<img.width;x++) {
+      
+      int lx;
+      if(use_clpattern) lx = ((int)(x*pattern_factor))%limg.width;
+      else              lx = (int)map(x,0,img.width-1,0,limg.width-1);
+      
+      for(int y=0;y<img.height;y++) {
+        
+        int ly;
+        if(use_clpattern) ly = ((int)(y*pattern_factor))%limg.height;
+        else              ly = (int)map(y,0,img.height-1,0,limg.height-1);
+        
         color c = limg.pixels[lx+ly*limg.width];
         
-        int posx = (x+getShift(c, 0)+2*width)%width;
-        int posy = (y+getShift(c, 1)+2*height)%height;
+        int posx = (x+getShift(c, 0)+2*img.width)%img.width;
+        int posy = (y+getShift(c, 1)+2*img.height)%img.height;
         
-        color n = img.pixels[posx+posy*width];
+        color n = img.pixels[posx+posy*img.width];
         
-        fill(n);
+        buffer.fill(n);
        //  fill(red(c),green(c),blue(n)); // work only on blue channel
        //  fill(red(n), abs(green(c)-green(n)), blue(n)); // green channel is blended using difference method  
-        rect(x,y,1,1);
+        buffer.rect(x,y,1,1);
       }
     }
+    
+   buffer.endDraw(); 
+   image(buffer,0,0,width,height);
 }
 
 void draw() {
   if(interactive) {
-    facts[0] = mouseX;
-    facts[1] = mouseY;
+    facts[0] = (int)map(mouseX,0,width,0,img.width);
+    facts[1] = (int)map(mouseY,0,height,0,img.height);
     
     drawMe();
   }
@@ -184,8 +202,8 @@ void mouseClicked() {
   channels[1] = (int)random(12);
   types[0] = (int)random(4);
   types[1] = (int)random(4);
-  facts[0] = mouseX;
-  facts[1] = mouseY;
+  facts[0] = (int)map(mouseX,0,width,0,img.width);
+  facts[1] = (int)map(mouseY,0,height,0,img.height);
   
   drawMe();
 }
@@ -197,7 +215,7 @@ void keyPressed() {
   }
   
   if(keyCode == 32) {
-    saveFrame("res_"+(int)random(10000,99999)+"_"+filename);
+    buffer.save(foldername + filename + "/res_" + sessionid + hex((int)random(0xffff),4)+"_"+filename+fileext);
     println("image saved");
   }
   
@@ -206,4 +224,27 @@ void keyPressed() {
     println("pattern changed");
     drawMe();
   }
+}
+
+void getCLPattern() {
+  int n = (int)random(1,4719052);
+  print("Loading pattern from ColourLovers number: "+n+"...");
+  
+  String pad="";
+  if(n<1000) pad = "0";
+  else {
+    String nn = ""+n;
+    pad = nn.substring(0,nn.length()-3);
+  }
+  
+  String clname = "http://colourlovers.com.s3.amazonaws.com/images/patterns/"+pad+"/"+n+".png";
+  try {
+    limg = loadImage(clname, "png");
+  } catch(Exception e) {
+    getCLPattern();
+  }
+
+  if(limg.width <=0) getCLPattern();
+  
+  println(" done");
 }
