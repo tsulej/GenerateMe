@@ -58,7 +58,18 @@ void draw() {
 void processImage() {
   buffer.beginDraw();
   
-  //
+  // START CODE HERE! use buffer to draw/manipulate
+  
+  for(int x=0;x<buffer.width;x++) {
+    for(int y=0;y<buffer.height;y++) {
+      //swap hsb <> rgb
+      color c = img.get(x,y);
+      buffer.fill( hue(c), saturation(c), brightness(c) );
+      buffer.rect(x,y,1,1);
+    }
+  }
+  
+  // END CODE HERE!
   
   if(do_blend)
     buffer.blend(img,0,0,img.width,img.height,0,0,buffer.width,buffer.height,blend_mode);
