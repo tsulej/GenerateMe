@@ -4,6 +4,7 @@
 
 // Usage:
 //   * press SPACE to save
+//   * click to random setup
 
 // set up filename
 String filename = "test";
@@ -79,6 +80,8 @@ byte[] cr,cb,cg;
 void processImage() {
   buffer.beginDraw();
   
+  print("Preparing... ");
+  
   comp1 = new LZ77( compressor_attributes[0][0], compressor_attributes[0][1] );
   comp2 = new LZ77( compressor_attributes[1][0], compressor_attributes[1][1] );
   comp3 = new LZ77( compressor_attributes[2][0], compressor_attributes[2][1] );
@@ -98,6 +101,7 @@ void processImage() {
     }
     iter++;
   }
+  println("done");
   
   print("Glitching channel 1... ");
   comp1.doCompress(cr);  
@@ -140,6 +144,26 @@ void processImage() {
   buffer.endDraw();
   image(buffer,0,0,width,height);
 }
+
+void mouseClicked() {
+  println("");
+  println("Config:");
+  colorspace = random(1)<0.4?RGB:HSB;
+  println("Colorspace: " + (colorspace==RGB?"RGB":"HSB"));
+  do_blend = random(1)<0.2;
+  blend_mode = blends[(int)random(blends.length)];
+  for(int i=0;i<3;i++) {
+    compressor_attributes[i][0] = (int)random(100,3000);
+    compressor_attributes[i][1] = (int)(random(0.1,0.5)*compressor_attributes[i][0]);
+    number_of_glitches[i][0] = (int)random(20,1000);
+    number_of_glitches[i][1] = random(0.1,2);
+    println("Channel "+(i+1)+" = ("+compressor_attributes[i][0]+","+compressor_attributes[i][1]+")"
+            + ", glitches = ("+number_of_glitches[i][0]+","+number_of_glitches[i][1]+")");
+  }
+  processImage();
+}
+
+
 
 void keyPressed() {
   // SPACE to save
