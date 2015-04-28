@@ -70,7 +70,7 @@ void setup() {
     c.clist.clear();
     
     int blen = 0;
-    for(int iter=0;iter<b.length;iter+=(2+type)) {
+    for(int iter=0;iter<b.length-(1+type);iter+=(2+type)) {
       int d = (b[iter] & 0xff) | ( type == LARGE ? (b[iter+1]&0xff)<<8 : 0 );
       int offset = (d & dict);
       int len = (d >> dictsize) & ahead;
