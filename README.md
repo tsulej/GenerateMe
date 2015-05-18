@@ -19,4 +19,10 @@ List:
   * slitscan - simulate errors during scanning (more digital way)
   * wzipprocess2 - recompress image using wzip method (Haar wavelet transformation)
   * imageslicer - few algorithms based on segmentation of the image
+  * cutsort - cut image to lines of random length, sort (or not) and encode image, decode to get glitched result
+  * distorter - another way to pixel displacement
+  * lz77 - two script to compress/decompress image/binary with random glitch compressed data
+  * median_filter - median filter with option to choose other points (not only median)
+  * wrongqsort - cut image to lines/parts and use buggy QuickSort to sort pixels
+  * TEMPLATE - clean template sketch with some predefined functions
   
