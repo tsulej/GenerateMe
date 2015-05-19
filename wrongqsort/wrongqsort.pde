@@ -65,16 +65,16 @@ void setup() {
 int len;
 
 void draw() {
-  // fill for iterative processing
-}
-
-void mouseMoved() {
-  float x = constrain (mouseX, 1, width);
-  float y = constrain(mouseY, 1, height);
-  int vall = int(x*y);
+  float x = map(mouseX, 0, width-1,0,1);
+  float y = map(mouseY, 0, height-1,0,1);
+  int vall = (int)map(x*y,0,1,1,len-1);
   processImage(vall);
 }
 
+float random_point = 0.5;
+void mouseMoved() {
+  random_point = random(0.1,0.9);
+}
 
 void processImage(int v) {
   buffer.beginDraw();
@@ -121,7 +121,7 @@ int partition(int x[], int left, int right) {
   int i = left;
   int j = right;
   int temp;
-  int pivot = x [(left+right)/2];
+  int pivot = x [(int)map(random_point,0,1,left,right)];
   while (i<= j) {
     while(x[i] < pivot) {
       i++;
