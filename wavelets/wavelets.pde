@@ -33,6 +33,7 @@ int max_display_size = 800; // viewing window size (regardless image size)
 // configuration
 boolean equalize = true; // equalize and normalize histogram?
 int colorspace = RGB; // RGB or HSB
+boolean same_transform = true ; // true to use the same transform for each channel (transform 1)
 
 // configure each transform
 void initialize() {
@@ -89,6 +90,8 @@ void initialize() {
   transformr = gmtrans1;
   transformg = gmtrans2;
   transformb = gmtrans3;
+
+  if(same_transform) transformb = transformg = transformr;
   
   println("Transform 1");
   transformr.printSetup();
@@ -168,7 +171,8 @@ void mouseClicked() {
 GMTrans transformr, transformg, transformb;
 
 void setupWavelets() {
-  colorspace = random(1)<0.5?RGB:HSB; 
+  colorspace = random(1)<0.5?RGB:HSB;
+  same_transform = random(1)<0.5; 
   Wavelet w1,w2,w3;
   if(random(1)<0.3) {
     w1 = w2 = w3 = wtab[(int)random(wtab.length)];
@@ -190,6 +194,8 @@ void setupWavelets() {
   transformr = new GMTrans(w1,wt1);
   transformg = new GMTrans(w2,wt2);
   transformb = new GMTrans(w3,wt3);
+
+  if(same_transform) transformb = transformg = transformr;
 
   println("Transform 1");
   transformr.printSetup();
