@@ -24,5 +24,7 @@ List:
   * lz77 - two script to compress/decompress image/binary with random glitch compressed data
   * median_filter - median filter with option to choose other points (not only median)
   * wrongqsort - cut image to lines/parts and use buggy QuickSort to sort pixels
+  * wavelets - wavelet compression tool
+  * pngglitch - corrupt PNG files (using hacked decoder)
   * TEMPLATE - clean template sketch with some predefined functions
   
