@@ -26,5 +26,7 @@ List:
   * wrongqsort - cut image to lines/parts and use buggy QuickSort to sort pixels
   * wavelets - wavelet compression tool
   * pngglitch - corrupt PNG files (using hacked decoder)
+  * ultimateSort - partly sort thresholded pixels with various algorithms
+  * moire - random moire patterns generator / simulator
   * TEMPLATE - clean template sketch with some predefined functions
   
