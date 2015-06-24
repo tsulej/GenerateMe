@@ -11,8 +11,8 @@ String filename = "moire";
 String fileext = ".jpg";
 String foldername = "./";
 
-int image_size = 1000; // setup result size
-int max_display_size = 800; // viewing window size (regardless result size)
+int image_size = 1600; // setup result size
+int max_display_size = 600; // viewing window size (regardless result size)
 
 float stripe_density = 25; // higher number, narrower stripes 
 
