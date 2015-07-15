@@ -144,6 +144,7 @@ final static int SMOOTH = 7; // lines
 final static int PERMUTE = 8; // pixels are just randomized, amount is not used
 final static int ONECOLOR = 9; // set pixels to one color, amount means which color use (0 first pixel, 1 last pixel, 0.5 middle pixel, etc)
 final static int ROLL = 10; // roll pixels left, amount means how much to roll (0.5 - halfway)
+final static int ONECOLORB = 11; // as one color but made in blocks (based on noise), amount means scale factor for noise function 
 // more algorithms to come: coctail, gnome, comb, oddeven, maybe more...
 
 // CHANNELS
@@ -383,6 +384,9 @@ void sortMe(color[] t, int cnt, float thr) {
   case ROLL:
     roll(t, cnt, thr);
     break;
+  case ONECOLORB:
+    onecolorb(t, cnt, thr);
+    break;
   default: 
     bubbleSort(t, cnt, thr);
   }
@@ -402,6 +406,21 @@ void permute(color[] t, int cnt, float thr) {
   for (int i=1; i<cnt; i++) {
     int r = (int)random(i, cnt);
     swap(t, r, i-1);
+  }
+}
+
+void onecolorb(color[] t, int cnt, float thr) {
+  float np = 0;
+  boolean nv = noise(np,0.5) > 0.5;
+  color c = t[0];
+  for (int i=0; i<cnt-1; i++) { 
+    t[i] = c;
+    boolean cv = noise(np,0.5) > 0.5;
+    if( nv != cv ) {
+      nv = cv;
+      c = t[i+1];
+    }
+    np += thr;
   }
 }
 
