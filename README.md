@@ -28,5 +28,6 @@ List:
   * pngglitch - corrupt PNG files (using hacked decoder)
   * ultimateSort - partly sort thresholded pixels with various algorithms
   * moire - random moire patterns generator / simulator
+  * pix2line - convert pixels into lines snapped to noise grid
   * TEMPLATE - clean template sketch with some predefined functions
   
