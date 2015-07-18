@@ -2,6 +2,10 @@
 // Tomasz Sulej, generateme.blog@gmail.com, http://generateme.tumblr.com
 // Licence: http://unlicense.org/
 
+// Usage:
+//   * press SPACE to save
+//   * press 'a' to save animation frames
+
 // Read ALL (I repeat ALL) text below until written "STOP READING HERE" :)
 
 // This is quite complicated machine for sort images in many various ways.
@@ -39,6 +43,10 @@ final static int[] blends = {
   ADD, SUBTRACT, DARKEST, LIGHTEST, DIFFERENCE, EXCLUSION, MULTIPLY, SCREEN, OVERLAY, HARD_LIGHT, SOFT_LIGHT, DODGE, BURN
 };
 
+// If you want to animate process, set number of frames you want to save
+int animation_frames_count = 60;
+int animation_easing = LINEAR; // LINEAR or CUBIC
+
 // We are near to the crucial part, configuration of sorting machine
 // But first look at block below, you need to remember one thing here: name of the variable ie. HUE_RED, HUE_CYAN_W, etc...
 // See, there is also name 'TRUE'
@@ -71,59 +79,59 @@ IEval TRUE = new C_TRUE();
 
 Configurator[] recipes = { // do not touch this line...
   RECIPE(HEAP, 0.05, DEFAULT | NEGATE, RIGHT, HUE_RED_W), // comma!
-  RECIPE(QUICK, 0.2, DEFAULT | DESC, TOP, NOT(HUE_RED_W)) // last rule do not have comma
+  RECIPE(QUICK, 0.2, DEFAULT | DESC, BOTTOM, NOT(HUE_RED_W)) // last rule do not have comma
   }; // ...neither this
 
-//another example below 
-//Configurator[] recipes = { // do not touch this line...
-//  RECIPE(PERMUTE, 0.523635, ABSOLUTE | DESC, RIGHT, OR(HUE_RED,HUE_PINK_W)), // comma!
-//  RECIPE(SHELL, 0.01523635, DESC, BOTTOM, OR(HUE_RED,HUE_PINK_W)), // comma!
-//  RECIPE(HEAP, 0.008751599, DEFAULT | DESC, TOP, NOT(OR(HUE_RED,HUE_PINK_W)))
-//  }; // ...neither this
+  //another example below 
+  //Configurator[] recipes = { // do not touch this line...
+  //  RECIPE(PERMUTE, 0.523635, ABSOLUTE | DESC, RIGHT, OR(HUE_RED,HUE_PINK_W)), // comma!
+  //  RECIPE(SHELL, 0.01523635, DESC, BOTTOM, OR(HUE_RED,HUE_PINK_W)), // comma!
+  //  RECIPE(HEAP, 0.008751599, DEFAULT | DESC, TOP, NOT(OR(HUE_RED,HUE_PINK_W)))
+  //  }; // ...neither this
 
-// If you want to add/replace your rules for your step, you need to construct your own RECIPE line. You have to define 5 things:
-// 1. Set sort algorithm (full list below, look for "SORTING ALGORITHMS" line)
-// 2. Set amount of sort. This is a number between 0 (no sort) and 1 (full sort). You can have two meanings of this parameter:
-//    a) in RELATIVE mode it means how much sort improvement you want to achive. Eg. 0.123 value means that you get 12,3% more sorted pixels than at beginning.
-//    b) in ABSOLUTE mode it means how much sort you want to have regardless of current value. Eg. 0.75 means that sort stops after 75% of pixels will be sorted.
-//       one note here, pixels taken from image are usually partly sorted (let's say it's 50% moreless), some algorithms can lower this value, some only improves, you need to experiment
-// 3. Set some specific flags. Flags can be combined together using "|" delimiter (obligatory)
-//    a) DEFAULT - ascending sort with relative amount
-//    b) RELATIVE (default) or ABSOLUTE - described in point 2
-//    c) ASC (default) or DESC - ascending or descending sort
-//    d) POSITIVE (default) or NEGATIVE - work on image as it is or negate pixels
-// 4. Set sort direction: RIGHT (to right), LEFT (to left), TOP (to top), BOTTOM (to bottom)
-// 5. Threshold rule. This is hardest stuff. Rule has a grammar and it's as follows
-//    a) Remember now block above with variable names starting HUE_... and TRUE at the end. These are predefined rules for you.
-//       HUE_color means: choose pixels with particular color. There are two modes: normal range and wide range.
-//       Eg. HUE_MAGENTA is normale range and chooses magenta pixels (hue range between 281 and 320) but
-//           HUE_MAGENTA_W is wider version of magenta with pink and blue touch (hue range between 241 and 330).
-//           All ranges are described under following link: http://www.workwithcolor.com/color-names-01.htm
-//       TRUE means - sort me whole line, no treshold!
-//    b) you can define your own range on any possible channel, syntax is:
-//       RANGE( channel, minimum value, maximum value)
-//         - list of all possible channels is below (look for "CHANNELS" line)
-//         - minimum and maximum value can have 3 options:
-//           Option a: integer number between 0 and 255, typical channels value.
-//           Option b: float number between 0 and 0.99999999 (normalized form)
-//           Option c: uniform random value between specified range in form RAND(from, to)
-//        Example 1: RANGE(BRIGHTNESS,0,100) - choose pixels with brighntess value between 0 and 100. Only dark pixel.
-//        Example 2: RANGE(RED, 0.5, 0.8) - choose pixels with red channel value between 50% and 80%
-//        Example 3: RANGE(ALPHA, RAND(0,0.1), 0.5) - choose pixel with alpha value between random value (from 0 to 10%) and 50%
-//    c) you can make nagation of every rule using NOT(your rule here)
-//        Example 1: NOT(HUE_PINK) - choose not pink pixels
-//        Example 2: NOT( RANGE(SATURATION, 50,100) ) - choose pixels with saturation between 0-49 and 101-255.
-//    d) you can use logical operator AND and OR.
-//       - AND(first rule, second rule) - first and second rule must be valid for choosen pixel
-//       - OR(first rule, second rule) - first or second rule (or both) must be valid
-//       Example 1: AND( NOT(HUE_RED), RANGE(BRIGHTNESS,0,50) ) - choose pixels which are not red and are dark (brightness between 0 and 50
-//       Example 2: OR( HUE_GREEN_W, AND( NOT(HUE_RED), RANGE(BRIGHTNESS,0,50) ) ) - choose pixels which are green (wide range) or are as described above (dark, not red)
-//    NOTE: you can build threshold as complicated as you want 
+  // If you want to add/replace your rules for your step, you need to construct your own RECIPE line. You have to define 5 things:
+  // 1. Set sort algorithm (full list below, look for "SORTING ALGORITHMS" line)
+  // 2. Set amount of sort. This is a number between 0 (no sort) and 1 (full sort). You can have two meanings of this parameter:
+  //    a) in RELATIVE mode it means how much sort improvement you want to achive. Eg. 0.123 value means that you get 12,3% more sorted pixels than at beginning.
+  //    b) in ABSOLUTE mode it means how much sort you want to have regardless of current value. Eg. 0.75 means that sort stops after 75% of pixels will be sorted.
+  //       one note here, pixels taken from image are usually partly sorted (let's say it's 50% moreless), some algorithms can lower this value, some only improves, you need to experiment
+  // 3. Set some specific flags. Flags can be combined together using "|" delimiter (obligatory)
+  //    a) DEFAULT - ascending sort with relative amount
+  //    b) RELATIVE (default) or ABSOLUTE - described in point 2
+  //    c) ASC (default) or DESC - ascending or descending sort
+  //    d) POSITIVE (default) or NEGATIVE - work on image as it is or negate pixels
+  // 4. Set sort direction: RIGHT (to right), LEFT (to left), TOP (to top), BOTTOM (to bottom)
+  // 5. Threshold rule. This is hardest stuff. Rule has a grammar and it's as follows
+  //    a) Remember now block above with variable names starting HUE_... and TRUE at the end. These are predefined rules for you.
+  //       HUE_color means: choose pixels with particular color. There are two modes: normal range and wide range.
+  //       Eg. HUE_MAGENTA is normale range and chooses magenta pixels (hue range between 281 and 320) but
+  //           HUE_MAGENTA_W is wider version of magenta with pink and blue touch (hue range between 241 and 330).
+  //           All ranges are described under following link: http://www.workwithcolor.com/color-names-01.htm
+  //       TRUE means - sort me whole line, no treshold!
+  //    b) you can define your own range on any possible channel, syntax is:
+  //       RANGE( channel, minimum value, maximum value)
+  //         - list of all possible channels is below (look for "CHANNELS" line)
+  //         - minimum and maximum value can have 3 options:
+  //           Option a: integer number between 0 and 255, typical channels value.
+  //           Option b: float number between 0 and 0.99999999 (normalized form)
+  //           Option c: uniform random value between specified range in form RAND(from, to)
+  //        Example 1: RANGE(BRIGHTNESS,0,100) - choose pixels with brighntess value between 0 and 100. Only dark pixel.
+  //        Example 2: RANGE(RED, 0.5, 0.8) - choose pixels with red channel value between 50% and 80%
+  //        Example 3: RANGE(ALPHA, RAND(0,0.1), 0.5) - choose pixel with alpha value between random value (from 0 to 10%) and 50%
+  //    c) you can make nagation of every rule using NOT(your rule here)
+  //        Example 1: NOT(HUE_PINK) - choose not pink pixels
+  //        Example 2: NOT( RANGE(SATURATION, 50,100) ) - choose pixels with saturation between 0-49 and 101-255.
+  //    d) you can use logical operator AND and OR.
+  //       - AND(first rule, second rule) - first and second rule must be valid for choosen pixel
+  //       - OR(first rule, second rule) - first or second rule (or both) must be valid
+  //       Example 1: AND( NOT(HUE_RED), RANGE(BRIGHTNESS,0,50) ) - choose pixels which are not red and are dark (brightness between 0 and 50
+  //       Example 2: OR( HUE_GREEN_W, AND( NOT(HUE_RED), RANGE(BRIGHTNESS,0,50) ) ) - choose pixels which are green (wide range) or are as described above (dark, not red)
+  //    NOTE: you can build threshold as complicated as you want 
 
-// now names you will use
+  // now names you will use
 
-// FLAGS (described in point 2 above) 
-final static int DEFAULT = 0;
+  // FLAGS (described in point 2 above) 
+  final static int DEFAULT = 0;
 final static int ABSOLUTE = 1;
 final static int RELATIVE = 0;
 final static int ASC = 0;
@@ -164,6 +172,10 @@ final static int NSATURATION = 11;
 final static int NBRIGHTNESS = 12;
 final static int NALPHA = 13;
 
+// EASING in animations
+final static int LINEAR = 0;
+final static int CUBIC = 1;
+
 // YOU ARE READY TO USE, EXPERIMENT, EXPLORE, DON'T GIVE UP, ENJOY
 // STOP READING HERE
 
@@ -193,7 +205,7 @@ String sessionid;
 void setup() {
   sessionid = hex((int)random(0xffff), 4);
   img = loadImage(foldername+filename+fileext);
-  if(do_blend) orig = img.get();
+  orig = img.get();
 
   buffer = createGraphics(img.width, img.height);
   buffer.beginDraw();
@@ -225,8 +237,26 @@ void setup() {
   processImage();
 }
 
+float anim_step = 0;
+boolean animate = false;
+String anim_hash = "1234";
+int anim_cnt = 1000;
+
 void draw() {
-  // fill for iterative processing
+  if (animate) {
+    buffer.image(orig, 0, 0);
+    img = orig.get();
+    for (int i=0; i<recipes.length; i++) {
+      Configurator c = recipes[i];
+      c.amount = animation_easing == LINEAR ? anim_step : sq(anim_step);
+    }
+    anim_step += 1.0/animation_frames_count;
+    println(anim_step);
+    processImage();
+    saveFrame(foldername + filename + "/anim"+sessionid+anim_hash+"/frame" + anim_cnt +fileext);
+    anim_cnt++;
+    if(anim_step>1.0) animate = false;
+  }
 }
 
 void processImage() {
@@ -260,9 +290,9 @@ void processImage() {
       sortH();
     else
       sortV();
-      
+
     buffer.endDraw();  
-    img = buffer.get(0, 0, img.width, img.height);  
+    img = buffer.get(0, 0, img.width, img.height);
   }
 
 
@@ -281,6 +311,12 @@ void keyPressed() {
     String fn = foldername + filename + "/res_" + sessionid + hex((int)random(0xffff), 4)+"_"+filename+fileext;
     buffer.save(fn);
     println("Image "+ fn + " saved");
+  }
+  if(key == 'a') {
+    anim_hash = hex((int)random(0xffff), 4);
+    anim_step = 0;
+    animate = true;
+    anim_cnt = 1000;
   }
 }
 
@@ -411,12 +447,12 @@ void permute(color[] t, int cnt, float thr) {
 
 void onecolorb(color[] t, int cnt, float thr) {
   float np = 0;
-  boolean nv = noise(np,0.5) > 0.5;
+  boolean nv = noise(np, 0.5) > 0.5;
   color c = t[0];
   for (int i=0; i<cnt-1; i++) { 
     t[i] = c;
-    boolean cv = noise(np,0.5) > 0.5;
-    if( nv != cv ) {
+    boolean cv = noise(np, 0.5) > 0.5;
+    if ( nv != cv ) {
       nv = cv;
       c = t[i+1];
     }
@@ -878,3 +914,4 @@ class C_RANGE implements IEval {
     return (v >= newa) && (v <= newb);
   }
 }
+
