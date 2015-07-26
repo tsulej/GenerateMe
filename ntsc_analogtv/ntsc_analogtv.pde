@@ -9,6 +9,7 @@
 //   Click mouse to set random settings
 //   Press space to save to PNG
 //   Press ENTER to reset to default setting
+//   Press 'i' for interactive mode
 // Have fun :)
 //
 // Tweaking: see variables below, change parameters as stated in comment, experiment. This affects default setting.
