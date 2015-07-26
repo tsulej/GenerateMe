@@ -34,8 +34,10 @@ String foldername = "./";
 String secondimage = null;
 
 // General settings
-int W = 1024; // width of the screen, height is 75% of width to have 4:3 ratio
+int W = 600; // width of the screen, height is 75% of width to have 4:3 ratio
 float NOISE = 0.06; // TV noise, value range: (0.0,1.0)
+
+boolean interactive_mode = false; // press i and move mouse to adjust level (x axis) and signal loss (y axis)
 
 // Reception settings
 int OFS = 0; // initial signal offset, set randomly to see signal synchronization process, value range: (0.0,tv.ANALOGTV_SIGNAL_LEN)
@@ -175,6 +177,10 @@ void draw() {
   
   tv.powerup += powerup_step;
   try {
+    if(interactive_mode) {
+      rec1.level = map(mouseX,0,width-1,0,3);
+      rec1.hfloss = map(mouseY,0,height-1,-1,1);
+    }
     tv.draw(n);
   } catch (Exception e) { e.printStackTrace(); }
 }
@@ -183,13 +189,19 @@ void mousePressed() {
   randomize();
 }
 
+int save_seq = 10000;
+
 void keyPressed() {
   noLoop();
   switch(keyCode) {
     case ENTER: reset(); break;
     case RETURN: reset(); break;
-    case 32: saveFrame(foldername + filename + "/res_" + sessionid + hex((int)random(0xffff),4)+"_"+filename+fileext);
+    case 32: saveFrame(foldername + filename + "/res_" + sessionid + "_"+(save_seq++)+"_"+filename+fileext);
     default: break;
+  }
+  if(key == 'i') {
+    interactive_mode = !interactive_mode;
+    println("interactive mode: " + interactive_mode);
   }
   loop(); 
 }
