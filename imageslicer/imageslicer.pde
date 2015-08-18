@@ -36,12 +36,16 @@ String filename = "test";
 String fileext = ".jpg";
 String foldername = "./";
 
+// you can use different image as mask
+String mask = null;
+
 int max_display_size = 800; // viewing window size (regardless image size)
 
-float max_rotation = TWO_PI; // random rotation up to specified angle, 0 - TWO_PI, 0 - no rotation
+float max_rotation = TWO_PI; // random or fixed rotation up to specified angle, 0 - TWO_PI, 0 - no rotation
+boolean fixed_rotation = true; // fixed or random rotation
 int thr_min = -1; // you can change color of segment for specified brightness threshold
 int thr_max = -1; // set to -1 if you don't want to use it, values from 0 to 255
-color[] palette = { #000000, #ff0000, #ffffff }; // choose colors for palette you want to use with threshold, colors will be choosen randomly
+color[] palette = { #000000, #E7CBB3, #CEC6AF, #A0C3BC, #7C7F84, #ffffff }; // choose colors for palette you want to use with threshold, colors will be choosen randomly
 
 // PATTERNS config
 int max_patterns = 20; // how much patterns download from colourlovers, higher number, more to download
@@ -52,6 +56,8 @@ float max_shift = 2; // max expected shift, using gaussian random, so bigger num
 int type = ROTATE; // choose type of distortion: PATTERNS, SEPARATE, ROTATE, SHIFTCOPY, SORT
 boolean do_blend = false; // blend result with original?
 int blend_type = SUBTRACT; // list here: https://processing.org/reference/blend_.html
+
+boolean downloadPatterns = false; // download patterns or cut some from image
 
 // segmentation config START
 float threshold = 500.0; // higher number - bigger segments
@@ -66,7 +72,7 @@ final static int SATURATION = 3;
 final static int ABSDIST = 4;
 
 // do not touch it
-PImage img; // load image to this variable
+PImage img, mimg; // load image to this variable
 // segmentation config END
 
 // do not touch, list of types
@@ -84,6 +90,9 @@ String sessionid;
 void setup() {
   sessionid = hex((int)random(0xffff),4);
   img = loadImage(foldername+filename+fileext);
+  
+  if(mask != null) mimg = loadImage(foldername + mask);
+  else mimg = img;
   
   buffer = createGraphics(img.width, img.height);
   buffer.beginDraw();
@@ -152,6 +161,8 @@ void setupRandom() {
   min_comp_size = (int)random(10,500);
   if(random(1)<0.1) blur = (int)random(1,6); else blur = 0;
   stat_type = (int)random(6);
+  downloadPatterns = random(1)<0.5;
+  fixed_rotation = random(1)<0.5;
 }
 
 void printOptions(PrintWriter w) {
@@ -194,14 +205,15 @@ void printOptions(PrintWriter w) {
   buff.add("blur = " + blur);
   s = "stat_type = ";
   switch(stat_type) {
-    case DIST: s+="DIST"; break;
     case HUE: s+="HUE"; break;
     case BRIGHTNESS: s+="BRIGHTNESS"; break;
     case SATURATION: s+="SATURATION"; break;
     case ABSDIST: s+="ABSDIST"; break;
-    default: break; 
+    default: s+="DIST"; break; 
   }  
   buff.add(s);
+  buff.add("fixed_rotation = " + fixed_rotation);
+  buff.add("downloadPatterns = " + downloadPatterns);
   
   for(String str : buff) {
     if(w == null) println(str);
@@ -214,7 +226,7 @@ class S {
     color c; // color of the segment root point
     int x,y; // position of segment root point
     int dx, dy; // segment shift
-    float rot, pats;
+    float rots, rotc, pats;
     PImage pat;
     // sort
     color[] clrs;
@@ -251,7 +263,8 @@ void processSlices() {
       }
       else { 
         segm = new S();
-        segm.rot = random(max_rotation);
+        segm.rots = sin(fixed_rotation?max_rotation:random(max_rotation));
+        segm.rotc = cos(fixed_rotation?max_rotation:random(max_rotation));
         segm.c = img.get(x,y);
         segm.dx = (int)(max_shift*randomGaussian());
         segm.dy = (int)(max_shift*randomGaussian());
@@ -275,8 +288,8 @@ void processSlices() {
       if(type == PATTERNS) {
         int vx = segm.x-x;
         int vy = segm.y-y;
-        float sinr = sin(segm.rot);
-        float cosr = cos(segm.rot);
+        float sinr = segm.rots;
+        float cosr = segm.rotc;
         int imgx = int(segm.pat.width+x+(cosr*vx-sinr*vy))%segm.pat.width;
         int imgy = int(segm.pat.height+x+(sinr*vx+cosr*vy))%segm.pat.height;
         buffer.fill(segm.pat.get(imgx,imgy));
@@ -292,8 +305,8 @@ void processSlices() {
       } else if(type == ROTATE) {
         int vx = segm.x-x;
         int vy = segm.y-y;
-        float sinr = sin(segm.rot);
-        float cosr = cos(segm.rot);
+        float sinr = segm.rots;
+        float cosr = segm.rotc;
         int imgx = int(img.width+x+(cosr*vx-sinr*vy))%img.width;
         int imgy = int(img.height+y+(sinr*vx+cosr*vy))%img.height;
         buffer.fill(img.get(imgx,imgy));
@@ -345,6 +358,7 @@ final float getStat(color c1, color c2) {
 }
 
 void processImage() {
+  println("");
   println("Processing...");
   edges.clear();
   makeEdges();
@@ -364,7 +378,7 @@ class Edge implements Comparable {
 ArrayList<Edge> edges = new ArrayList<Edge>();
 
 void makeEdges() {
-  PImage img2 = img.get(0,0,img.width,img.height);
+  PImage img2 = mimg.get(0,0,img.width,img.height);
   if(blur > 0) img2.filter(BLUR,blur);
   // make grid each point connected to neighbours
   for(int x=0;x<img2.width;x++)
@@ -484,8 +498,16 @@ PImage[] patterns;
 void preparePatterns() {
   patterns = new PImage[max_patterns];
   for(int i=0;i<max_patterns;i++) {
-    patterns[i] = getCLPattern();
+    patterns[i] = downloadPatterns?getCLPattern():getSelfPattern();
   }
+}
+
+PImage getSelfPattern() {
+  int x = (int)random(img.width-50);
+  int y = (int)random(img.height-50);
+  int sx = (int)random(50,img.width-x-1);
+  int sy = (int)random(50,img.height-y-1);
+  return img.get(x,y,sx,sy);
 }
 
 PImage getCLPattern() {
