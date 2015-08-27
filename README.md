@@ -29,5 +29,6 @@ List:
   * ultimateSort - partly sort thresholded pixels with various algorithms
   * moire - random moire patterns generator / simulator
   * pix2line - convert pixels into lines snapped to noise grid
+  * pixeldrifter - drift pixels using channel data
   * TEMPLATE - clean template sketch with some predefined functions
   
