@@ -1,10 +1,9 @@
-// Template for processing scripts
+// Drift pixels and blend, repeat
 // Tomasz Sulej, generateme.blog@gmail.com, http://generateme.tumblr.com
 // Licence: http://unlicense.org/
 
 // Usage:
 //   * press SPACE to save
-//   * press a,s,d,w for directions: left, down, right, up
 
 // set up filename
 String filename = "test";
