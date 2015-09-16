@@ -5,6 +5,7 @@
 // Usage:
 //   * press SPACE to save
 //   * press 'a' to save animation frames
+//   * press 'b' for batch process files from set folder
 
 // Read ALL (I repeat ALL) text below until written "STOP READING HERE" :)
 
@@ -29,7 +30,7 @@
 // First, set up filename you want to operate, remember when you see the result you can save it by pressing SPACE
 String filename = "test";
 String fileext = ".jpg";
-String foldername = "./";
+String foldername = "./"; // folder used for batch process also 
 
 // Second, set up window size (image size can be huge, this parameter will help you to see it)
 int max_display_size = 800;
@@ -78,9 +79,9 @@ IEval TRUE = new C_TRUE();
 // Run script now and see result.
 
 Configurator[] recipes = { // do not touch this line...
-  RECIPE(HEAP, 0.05, DEFAULT | NEGATE, RIGHT, HUE_RED_W), // comma!
-  RECIPE(QUICK, 0.2, DEFAULT | DESC, BOTTOM, NOT(HUE_RED_W)) // last rule do not have comma
-  }; // ...neither this
+  RECIPE(QUICK, 0.5, DEFAULT, RIGHT, HUE_RED_W), // comma!
+  RECIPE(MERGE, 0.95, DEFAULT, BOTTOM, NOT(HUE_RED_W)) // last rule do not have comma
+}; // ...neither this
 
   //another example below 
   //Configurator[] recipes = { // do not touch this line...
@@ -176,6 +177,11 @@ final static int NALPHA = 13;
 final static int LINEAR = 0;
 final static int CUBIC = 1;
 
+// if you press 'b' every frame following code will be called, put here anything you want
+void batchCallback(float step) {
+// recipes[0].amount = map(sin(step*TWO_PI),-1,1,0.2,0.8);
+}
+
 // YOU ARE READY TO USE, EXPERIMENT, EXPLORE, DON'T GIVE UP, ENJOY
 // STOP READING HERE
 
@@ -257,6 +263,9 @@ void draw() {
     anim_cnt++;
     if(anim_step>1.0) animate = false;
   }
+  if(doBatch) {
+    batchStep();
+  }
 }
 
 void processImage() {
@@ -317,6 +326,9 @@ void keyPressed() {
     anim_step = 0;
     animate = true;
     anim_cnt = 1000;
+  }
+  if(key == 'b' && !doBatch) {
+    batchProcess();
   }
 }
 
@@ -915,3 +927,40 @@ class C_RANGE implements IEval {
   }
 }
 
+// code for batch processing
+void batchStep() {
+  File n = batchList[batchIdx];
+    String name = n.getAbsolutePath(); 
+    if(name.endsWith(fileext)) {
+      print(n.getName()+"... ");
+      img = loadImage(name);
+      buffer.image(img, 0, 0);
+      batchCallback((float)batchIdx / batchFiles);
+      processImage();
+      save(foldername+batchUID+"/"+n.getName());
+      println("saved");
+    }
+    batchIdx++;
+    if(batchIdx >= batchList.length) {
+      doBatch = false;
+      println("results saved in "+ foldername+batchUID + " folder");
+    }
+}
+
+File[] batchList;
+int batchIdx = 0;
+String batchUID;
+boolean doBatch = false;
+float batchFiles = 0;
+void batchProcess() {
+  batchUID = sessionid + hex((int)random(0xffff),4);
+  File dir = new File(sketchPath+'/'+foldername);
+  batchList = dir.listFiles();
+  batchIdx = 0;
+  batchFiles = 0;
+  for(File n : batchList) {
+    if(n.getName().endsWith(fileext)) batchFiles=batchFiles+1.0;
+  }
+  println("Processing "+int(batchFiles)+" images from folder: " + foldername);
+  doBatch = true;
+}
