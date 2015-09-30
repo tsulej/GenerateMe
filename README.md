@@ -1,6 +1,6 @@
 # Processing 2 version
 
-This is unmaintained versions of scripts for Processing 2.
+This are unmaintained versions of scripts for Processing 2.
 Processing 3 versions are in master branch.
 
 # generateme
