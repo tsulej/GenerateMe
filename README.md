@@ -1,3 +1,8 @@
+# Processing 2 version
+
+This is unmaintained versions of scripts for Processing 2.
+Processing 3 versions are in master branch.
+
 # generateme
 Processing scripts used to generative glitch / art / design
 
