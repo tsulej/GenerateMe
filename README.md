@@ -6,7 +6,7 @@ https://www.facebook.com/generateme
 
 generateme.blog@gmail.com
 
-Detailed instructions inside scripts
+Detailed instructions inside scripts, examples included
 
 List:
   * decayscreen - decay image, based on XScreenSaver hack with the same name
@@ -30,5 +30,6 @@ List:
   * moire - random moire patterns generator / simulator
   * pix2line - convert pixels into lines snapped to noise grid
   * pixeldrifter - drift pixels using channel data
+  * watmap - divide target image into regions and map with most matching part from source set
   * TEMPLATE - clean template sketch with some predefined functions
   
