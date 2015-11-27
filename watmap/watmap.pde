@@ -207,6 +207,8 @@ void find_match(int posx, int posy, int w, int h) {
       int xx = (int)random(_img.w-w-1);
       int yy = (int)random(_img.h-h-1);
 
+      if(xx+w >= _img.w || yy+h >= _img.h) break;
+
       float lbr = 0;
       for (int x=xx, xi=posx; x< (xx+w); x++, xi++) {
         for (int y=yy, yi=posy; y< (yy+h); y++, yi++) {
