@@ -31,5 +31,6 @@ List:
   * pix2line - convert pixels into lines snapped to noise grid
   * pixeldrifter - drift pixels using channel data
   * watmap - divide target image into regions and map with most matching part from source set
+  * blendimages - blend source image set into target
   * TEMPLATE - clean template sketch with some predefined functions
   
