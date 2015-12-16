@@ -32,5 +32,6 @@ List:
   * pixeldrifter - drift pixels using channel data
   * watmap - divide target image into regions and map with most matching part from source set
   * blendimages - blend source image set into target
+  * threadraw - draw vertical threads based on image (similar to generative draw)
   * TEMPLATE - clean template sketch with some predefined functions
   
