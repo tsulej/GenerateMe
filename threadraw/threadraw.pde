@@ -27,6 +27,8 @@ int h_step_channel = NBRIGHTNESS;
 boolean h_step_sin = false; // linear (false) or sinusoidal (true)
 float h_step_ratio = 5; // -6..-1 and 1..6
 
+boolean ch_v_byte = false; // interpret channel value as byte
+
 color bckg_color = color(0,0,0); // background color
 
 int max_display_size = 800; // viewing window size (regardless image size)
@@ -87,12 +89,14 @@ PImage _img = null;
 
 int getVStep(int x, int y, int size) {
   float b = getChannel(img.get(x, y),v_step_channel);
+  if(ch_v_byte) b = 128+(int)((byte)(int(b)));
   float s = pow(map(b, 0, 255, 0, 1),v_step_exp);
   return 1+(int)(s*size);
 }
 
 int getHStep(int x, int y, int size) {
   float b = getChannel(img.get(x, y),h_step_channel);
+  if(ch_v_byte) b = 128+(int)((byte)(int(b)));
   if(h_step_sin) {
     float s = sin(pow(map(b, 0, 255, 0, 1),h_step_exp)*TWO_PI-PI);
     return (int)(s*size);
@@ -146,7 +150,7 @@ void processImage() {
 
 void randomizer() {
   glow = random(1)<0.5;
-  stepsize_init = (int)random(img.width/2,img.width);
+  stepsize_init = (int)random(img.width/4,img.width/2);
   stepsize_final = (int)random(15,30);
   stepsize_ratio = random(1);
   stroke_size = random(0.8,3);
@@ -157,6 +161,7 @@ void randomizer() {
   h_step_ratio = (random(1)<0.5?1:-1) * random(1,6);
   v_step_channel = (int)random(12);
   h_step_channel = (int)random(12);
+  ch_v_byte = random(1)<0.5;
 }
 
 void mousePressed() {
