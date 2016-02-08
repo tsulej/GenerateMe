@@ -349,9 +349,9 @@ void processSlices() {
 
 final float getStat(color c1, color c2) {
   switch(stat_type) {
-    case HUE: abs(hue(c1)-hue(c2));
-    case BRIGHTNESS: abs(brightness(c1)-brightness(c2));
-    case SATURATION: abs(saturation(c1)-saturation(c2));
+    case HUE: return abs(hue(c1)-hue(c2));
+    case BRIGHTNESS: return abs(brightness(c1)-brightness(c2));
+    case SATURATION: return abs(saturation(c1)-saturation(c2));
     case ABSDIST: return abs(red(c1)-red(c2)) + abs(green(c1)-green(c2)) + abs(blue(c1)-blue(c2));
     default: return sq(red(c1)-red(c2)) + sq(green(c1)-green(c2)) + sq(blue(c1)-blue(c2)); 
   }
