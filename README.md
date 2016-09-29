@@ -35,5 +35,6 @@ List:
   * threadraw - draw vertical threads based on image (similar to generative draw)
   * decompose_paint - decompose image into sqares/rectangles and fill it with some pattern
   * imsyntex - reconstruct image using texture synthesis algorithm
+  * fm - frequency modulation and demodulation
   * TEMPLATE - clean template sketch with some predefined functions
   
