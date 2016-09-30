@@ -185,6 +185,16 @@ void processImage() {
   image(buffer, 0, 0, width, height);
 }
 
+void mousePressed() {
+  float omega = map(mouseX, 0, width, 0, 1);
+  omega = map(sqrt(omega), 0, 1, min_omega, max_omega);
+  float phase = map(mouseY, 0, height, 0, 1);
+  phase = map(sq(phase), 0, 1, min_phase_mult, max_phase_mult);
+  float max_phase = phase * omega;
+  println("Carrier: 2PI * t * " + (omega/TWO_PI));
+  println("Phase shift (max signal amplitude): " + max_phase);
+}
+
 void keyPressed() {
   // SPACE to save
   if (keyCode == 32) {
