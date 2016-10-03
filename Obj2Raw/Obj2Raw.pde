@@ -38,7 +38,7 @@
 // - importing/exporting as 8 bit signed int removes some faces (rounding errors in Audacity), you can choose A-law to keep them all
 
 // set up filename
-String filename = "NefertitiHack3D_40k";
+String filename = "teapot";
 String fileext = ".jpg";
 String foldername = "./";
 
