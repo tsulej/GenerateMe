@@ -38,7 +38,7 @@
 // - importing/exporting as 8 bit signed int removes some faces (rounding errors in Audacity), you can choose A-law to keep them all
 
 // set up filename
-String filename = "teapot";
+String filename = "NefertitiHack3D_40k";
 String fileext = ".jpg";
 String foldername = "./";
 
@@ -167,6 +167,8 @@ void readRaw() {
       }
     }
     
+    recalculate();
+    
     println("Raw file " + fn + " loaded");
   } catch(Exception e) {
     println("ERROR: can't find file: " + fn);
@@ -212,7 +214,16 @@ void readObj() {
   s = loadShape(foldername + filename + ".obj");
   s.disableStyle();
 
-  // normalize data
+  recalculate();
+  
+  println("Obj file " + foldername + filename + ".obj" + " loaded");
+  saveRaw();
+  
+  println("");
+}
+
+void recalculate() {
+    // normalize data
   datacnt = 0;
   println("Number of faces: " + s.getChildCount());
   for (int p = 0; p<s.getChildCount (); p++) {
@@ -239,10 +250,5 @@ void readObj() {
 
   println("scale factor (display): " + scalef);
   println("bytes: " + datacnt);
-  
-  println("Obj file " + foldername + filename + ".obj" + " loaded");
-  saveRaw();
-  
-  println("");
 }
 
