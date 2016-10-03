@@ -76,7 +76,7 @@ void draw() {
   translate(width/2, height/2); 
   scale(scalef);
 
-  rotateY(map(mouseX, 0, width, 0, TWO_PI));
+  rotateY(map(mouseX, 0, width, -PI, PI));
   rotateZ(PI);
 
   shape(s, -midx, -midy);
