@@ -82,10 +82,11 @@ void draw() {
   shape(s, -midx, -midy);
 }
 
+int fn_iter = 0;
 void keyPressed() {
   // SPACE to save
   if (keyCode == 32) {
-    String fn = foldername + filename + "/res_" + sessionid + hex((int)random(0xffff), 4)+"_"+filename;
+    String fn = foldername + filename + "/res_" + sessionid + nf(fn_iter++,4) +"_"+filename;
     save(fn+fileext);
     saveObj(fn+".obj");
     println("Image "+ fn +fileext+ " saved");
