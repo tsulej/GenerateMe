@@ -64,7 +64,6 @@ void setup() {
   readObj();
 }
 
-
 void draw() {
   background(3, 22, 52);
 
@@ -106,8 +105,11 @@ void saveObj(String fn) {
   PrintWriter out = createWriter(fn);
   ArrayList<String> faces = new ArrayList<String>();
 
-  out.println("# Obj->Raw converter, export");
+  out.println("# Obj->Raw converter, export by GenerateMe");
   out.println("# original object: " + filename + ".obj");
+  out.println("# https://github.com/tsulej/GenerateMe/tree/master/Obj2Raw");
+  out.println("# http://generateme.tumblr.com");
+  
   out.println("");
   int iter = 1;
   for (int p = 0; p<s.getChildCount (); p++) {
