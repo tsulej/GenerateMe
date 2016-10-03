@@ -36,5 +36,6 @@ List:
   * decompose_paint - decompose image into sqares/rectangles and fill it with some pattern
   * imsyntex - reconstruct image using texture synthesis algorithm
   * fm - frequency modulation and demodulation
+  * Obj2Raw - convert OBJ vertex data to RAW 8 bit signed (for sonification purposes)
   * TEMPLATE - clean template sketch with some predefined functions
   
