@@ -36,5 +36,6 @@ List:
   * decompose_paint - decompose image into sqares/rectangles and fill it with some pattern
   * imsyntex - reconstruct image using texture synthesis algorithm
   * fm - frequency modulation and demodulation
+  * composite_video_simulator - very precise VHS/Composite Video/Tape simulation, based on: https://github.com/joncampbell123/composite-video-simulator
   * TEMPLATE - clean template sketch with some predefined functions
   
