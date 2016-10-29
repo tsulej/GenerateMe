@@ -38,6 +38,7 @@
 
 // Usage:
 //   * press SPACE to save
+//   * press 'b' for batch processing (all images in the folder 'foldername')
 
 // set up filename
 String filename = "test";
