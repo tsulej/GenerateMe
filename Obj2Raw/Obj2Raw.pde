@@ -43,6 +43,7 @@ String fileext = ".jpg";
 String foldername = "./";
 
 boolean planar = true;
+boolean do_not_display = false; // for big number of faces
 
 /////////////////////////
 
@@ -65,28 +66,30 @@ void setup() {
 }
 
 void draw() {
-  background(3, 22, 52);
+  if (!do_not_display) {
+    background(3, 22, 52);
 
-  lights();
-  ambient(205, 179, 128);
-  shininess(5.0);
+    lights();
+    ambient(205, 179, 128);
+    shininess(5.0);
 
-  camera(width/2, mouseY, (height/2) / tan(PI/6), width/2, height/2, 0, 0, 1, 0);
+    camera(width/2, mouseY, (height/2) / tan(PI/6), width/2, height/2, 0, 0, 1, 0);
 
-  translate(width/2, height/2); 
-  scale(scalef);
+    translate(width/2, height/2); 
+    scale(scalef);
 
-  rotateY(map(mouseX, 0, width, -PI, PI));
-  rotateZ(PI);
+    rotateY(map(mouseX, 0, width, -PI, PI));
+    rotateZ(PI);
 
-  shape(s, -midx, -midy);
+    shape(s, -midx, -midy);
+  }
 }
 
 int fn_iter = 0;
 void keyPressed() {
   // SPACE to save
   if (keyCode == 32) {
-    String fn = foldername + filename + "/res_" + sessionid + nf(fn_iter++,4) +"_"+filename;
+    String fn = foldername + filename + "/res_" + sessionid + nf(fn_iter++, 4) +"_"+filename;
     save(fn+fileext);
     saveObj(fn+".obj");
     println("Image "+ fn +fileext+ " saved");
@@ -110,7 +113,7 @@ void saveObj(String fn) {
   out.println("# original object: " + filename + ".obj");
   out.println("# https://github.com/tsulej/GenerateMe/tree/master/Obj2Raw");
   out.println("# http://generateme.tumblr.com");
-  
+
   out.println("");
   int iter = 1;
   for (int p = 0; p<s.getChildCount (); p++) {
@@ -167,11 +170,12 @@ void readRaw() {
         sh.setVertex(v, vec);
       }
     }
-    
+
     recalculate();
-    
+
     println("Raw file " + fn + " loaded");
-  } catch(Exception e) {
+  } 
+  catch(Exception e) {
     println("ERROR: can't find file: " + fn);
   }
 }
@@ -212,19 +216,20 @@ void saveRaw() {
 
 // read native Obj and save to RAW
 void readObj() {  
+  println("Loading obj");
   s = loadShape(foldername + filename + ".obj");
   s.disableStyle();
 
   recalculate();
-  
+
   println("Obj file " + foldername + filename + ".obj" + " loaded");
   saveRaw();
-  
+
   println("");
 }
 
 void recalculate() {
-    // normalize data
+  // normalize data
   datacnt = 0;
   println("Number of faces: " + s.getChildCount());
   for (int p = 0; p<s.getChildCount (); p++) {
