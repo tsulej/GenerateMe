@@ -92,10 +92,10 @@ void setup() {
   lpf1 = new LowpassFilter(rate, lowpass1_cutoff*rate);
   lpf2 = new LowpassFilter(rate, lowpass2_cutoff*rate);
   lpf3 = new LowpassFilter(rate, lowpass3_cutoff*rate);
-  
+
   pxls = new int[3][img.pixels.length];
   for (int i=0; i<img.pixels.length; i++) {
-    int cl = toColorspace(img.pixels[i],colorspace);
+    int cl = toColorspace(img.pixels[i], colorspace);
     pxls[0][i] = (cl >> 16) & 0xff;
     pxls[1][i] = (cl >> 8) & 0xff;
     pxls[2][i] = (cl) & 0xff;
@@ -104,14 +104,18 @@ void setup() {
 
 float omega, min_phase, max_phase;
 void draw() {
-  omega = map(mouseX, 0, width, 0, 1);
-  omega = map(sqrt(omega), 0, 1, min_omega, max_omega);
-  float phase = map(mouseY, 0, height, 0, 1);
-  phase = map(sq(phase), 0, 1, min_phase_mult, max_phase_mult);
-  max_phase = phase * omega;
-  min_phase = -max_phase;
+  if (doBatch) { 
+    batchStep();
+  } else {
+    omega = map(mouseX, 0, width, 0, 1);
+    omega = map(sqrt(omega), 0, 1, min_omega, max_omega);
+    float phase = map(mouseY, 0, height, 0, 1);
+    phase = map(sq(phase), 0, 1, min_phase_mult, max_phase_mult);
+    max_phase = phase * omega;
+    min_phase = -max_phase;
 
-  processImage();
+    processImage();
+  }
 }
 
 void processImage() {
@@ -119,16 +123,16 @@ void processImage() {
   buffer.loadPixels();
 
   int [][] dest_pxls = new int[3][img.pixels.length];
-  
-  if(first_channel_only) {
-    arrayCopy(pxls[1],dest_pxls[1]);
-    arrayCopy(pxls[2],dest_pxls[2]);
+
+  if (first_channel_only) {
+    arrayCopy(pxls[1], dest_pxls[1]);
+    arrayCopy(pxls[2], dest_pxls[2]);
   }
-  
-  for (int i=0; i<(first_channel_only?1:3); i++) {
+
+  for (int i=0; i< (first_channel_only?1:3); i++) {
     for (int y=0; y<img.height; y++) {
       int off = y * img.width;
-      
+
       //reset filters each line 
       lpf1.resetFilter(map(pxls[i][off], 0, 255, min_phase, max_phase));
       lpf2.resetFilter(map(pxls[i][off], 0, 255, min_phase, max_phase));
@@ -138,11 +142,11 @@ void processImage() {
       float pre_m = 0; // previous value of modulated signal
 
       for (int x=0; x<img.width; x++) {
-        
+
         /////////////////////////
         // FM part starts here
         /////////////////////////
-        
+
         float sig = map(pxls[i][x+off], 0, 255, min_phase, max_phase); // current signal value
         sig_int += sig; // current value of signal integral
 
@@ -162,20 +166,20 @@ void processImage() {
 
         // remap signal back to channel value
         int v = constrain( (int)map(2*(dem-omega), min_phase, max_phase, 0, 255), 0, 255);
-        
+
         //////////////////////
         // FM part ends here
         //////////////////////
-        
+
         dest_pxls[i][x+off] = negate?255-v:v;
       }
     }
   }
-  
+
   for (int i=0; i<buffer.pixels.length; i++) {
-    buffer.pixels[i] = fromColorspace(0xff000000 | (dest_pxls[0][i] << 16) |  (dest_pxls[1][i] << 8) |  (dest_pxls[2][i]),colorspace);
+    buffer.pixels[i] = fromColorspace(0xff000000 | (dest_pxls[0][i] << 16) |  (dest_pxls[1][i] << 8) |  (dest_pxls[2][i]), colorspace);
   }
-  
+
   buffer.updatePixels();
 
   if (do_blend)
@@ -202,8 +206,11 @@ void keyPressed() {
     buffer.save(fn);
     println("Image "+ fn + " saved");
   }
-  if(key == 'n') {
+  if (key == 'n') {
     negate = !negate;
+  }
+  if (key == 'b' && !doBatch) {
+    batchProcess();
   }
 }
 
@@ -249,3 +256,45 @@ class LowpassFilter {
   }
 }
 
+void batchCallback(float time) {
+  /// every image this functions is called
+  /// time ranges from 0 (first image) to 1 (last image)
+  /// set global variables or whatever you want
+}
+
+void batchStep() {
+  File n = batchList[batchIdx];
+  String name = n.getAbsolutePath(); 
+  if (name.endsWith(fileext)) {
+    print(n.getName()+"... ");
+    img = loadImage(name);
+    img.loadPixels();
+    batchCallback((float)batchIdx / batchFiles);
+    processImage();
+    buffer.save(foldername+batchUID+"/"+n.getName());
+    println("saved");
+  }
+  batchIdx++;
+  if (batchIdx >= batchList.length) {
+    doBatch = false;
+    println("results saved in "+ foldername+batchUID + " folder");
+  }
+}
+
+File[] batchList;
+int batchIdx = 0;
+String batchUID;
+boolean doBatch = false;
+float batchFiles = 0;
+void batchProcess() {
+  batchUID = sessionid + hex((int)random(0xffff), 4);
+  File dir = new File(sketchPath+'/'+foldername);
+  batchList = dir.listFiles();
+  batchIdx = 0;
+  batchFiles = 0;
+  for (File n : batchList) {
+    if (n.getName().endsWith(fileext)) batchFiles=batchFiles+1.0;
+  }
+  println("Processing "+int(batchFiles)+" images from folder: " + foldername);
+  doBatch = true;
+}
