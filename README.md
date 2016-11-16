@@ -1,4 +1,4 @@
-# generateme
+# GenerateMe
 Processing scripts used to generative glitch / art / design
 
 http://generateme.tumblr.com
@@ -7,6 +7,8 @@ https://www.facebook.com/generateme
 generateme.blog@gmail.com
 
 Detailed instructions inside scripts, examples included
+
+All below works on latest Processing 2 only! For Processing 3 versions see bottom.
 
 List:
   * decayscreen - decay image, based on XScreenSaver hack with the same name
@@ -40,3 +42,6 @@ List:
   * Obj2Raw - convert OBJ vertex data to RAW 8 bit signed (for sonification purposes)
   * TEMPLATE - clean template sketch with some predefined functions
   
+## Processing 3
+
+  * pixeldrifter - provided by @romanrandom
