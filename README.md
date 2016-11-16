@@ -1,8 +1,8 @@
 # GenerateMe
 Processing scripts used to generative glitch / art / design
 
-http://generateme.tumblr.com
-https://www.facebook.com/generateme
+  * http://generateme.tumblr.com
+  * https://github.com/Clojure2D/clojure2d
 
 generateme.blog@gmail.com
 
@@ -44,4 +44,4 @@ List:
   
 ## Processing 3
 
-  * pixeldrifter - provided by @romanrandom
+  * pixeldrifter - provided by https://github.com/romanrandom
