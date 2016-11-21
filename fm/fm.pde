@@ -92,7 +92,11 @@ void setup() {
   lpf1 = new LowpassFilter(rate, lowpass1_cutoff*rate);
   lpf2 = new LowpassFilter(rate, lowpass2_cutoff*rate);
   lpf3 = new LowpassFilter(rate, lowpass3_cutoff*rate);
+  
+  prepareData();
+}
 
+void prepareData() {
   pxls = new int[3][img.pixels.length];
   for (int i=0; i<img.pixels.length; i++) {
     int cl = toColorspace(img.pixels[i], colorspace);
@@ -104,16 +108,16 @@ void setup() {
 
 float omega, min_phase, max_phase;
 void draw() {
+  omega = map(mouseX, 0, width, 0, 1);
+  omega = map(sqrt(omega), 0, 1, min_omega, max_omega);
+  float phase = map(mouseY, 0, height, 0, 1);
+  phase = map(sq(phase), 0, 1, min_phase_mult, max_phase_mult);
+  max_phase = phase * omega;
+  min_phase = -max_phase;
+
   if (doBatch) { 
     batchStep();
   } else {
-    omega = map(mouseX, 0, width, 0, 1);
-    omega = map(sqrt(omega), 0, 1, min_omega, max_omega);
-    float phase = map(mouseY, 0, height, 0, 1);
-    phase = map(sq(phase), 0, 1, min_phase_mult, max_phase_mult);
-    max_phase = phase * omega;
-    min_phase = -max_phase;
-
     processImage();
   }
 }
@@ -269,6 +273,7 @@ void batchStep() {
     print(n.getName()+"... ");
     img = loadImage(name);
     img.loadPixels();
+    prepareData();
     batchCallback((float)batchIdx / batchFiles);
     processImage();
     buffer.save(foldername+batchUID+"/"+n.getName());
@@ -298,3 +303,4 @@ void batchProcess() {
   println("Processing "+int(batchFiles)+" images from folder: " + foldername);
   doBatch = true;
 }
+
