@@ -1,0 +1,3 @@
+[submodule "sonification"]
+	path = sonification
+	url = https://github.com/SonifyIt/sonification
