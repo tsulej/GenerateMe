@@ -6,8 +6,9 @@ Processing scripts used to generative glitch / art / design
 
 generateme.blog@gmail.com
 
-Detailed instructions inside scripts, examples included
+clone recursively ```git clone --recursive https://github.com/tsulej/GenerateMe.git```
 
+Detailed instructions inside scripts, examples included
 All below works on latest Processing 2 only! For Processing 3 versions see bottom.
 
 List:
