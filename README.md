@@ -6,8 +6,9 @@ Processing scripts used to generative glitch / art / design
 
 generateme.blog@gmail.com
 
-Detailed instructions inside scripts, examples included
+clone recursively ```git clone --recursive https://github.com/tsulej/GenerateMe.git```
 
+Detailed instructions inside scripts, examples included
 All below works on latest Processing 2 only! For Processing 3 versions see bottom.
 
 List:
@@ -40,6 +41,8 @@ List:
   * fm - frequency modulation and demodulation
   * composite_video_simulator - very precise VHS/Composite Video/Tape simulation, based on: https://github.com/joncampbell123/composite-video-simulator
   * Obj2Raw - convert OBJ vertex data to RAW 8 bit signed (for sonification purposes)
+  * granularresynth - Granular (re)synthesis of any RAW using other RAWs for visual/audio
+  * -> sonification - image sonification 
   * TEMPLATE - clean template sketch with some predefined functions
 
 ## Processing 3
