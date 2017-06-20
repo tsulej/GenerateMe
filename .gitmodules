@@ -1,3 +1,6 @@
 [submodule "sonification"]
 	path = sonification
 	url = https://github.com/SonifyIt/sonification
+[submodule "GLIC"]
+	path = GLIC
+	url = https://github.com/GlitchCodec/GLIC
