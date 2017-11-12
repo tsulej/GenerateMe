@@ -15,6 +15,7 @@
 // Usage:
 //   * move mouse X axis - change the carrier wave frequency
 //   * move mouse Y axis - change bandwidth
+//   * click mouse to fix setup (click again to release)
 //   * press N to negate image
 //   * press SPACE to save
 
@@ -92,8 +93,10 @@ void setup() {
   lpf1 = new LowpassFilter(rate, lowpass1_cutoff*rate);
   lpf2 = new LowpassFilter(rate, lowpass2_cutoff*rate);
   lpf3 = new LowpassFilter(rate, lowpass3_cutoff*rate);
-  
+
   prepareData();
+  
+  fixed_setup = false;
 }
 
 void prepareData() {
@@ -107,13 +110,18 @@ void prepareData() {
 }
 
 float omega, min_phase, max_phase;
+
+boolean fixed_setup = false;
+
 void draw() {
-  omega = map(mouseX, 0, width, 0, 1);
-  omega = map(sqrt(omega), 0, 1, min_omega, max_omega);
-  float phase = map(mouseY, 0, height, 0, 1);
-  phase = map(sq(phase), 0, 1, min_phase_mult, max_phase_mult);
-  max_phase = phase * omega;
-  min_phase = -max_phase;
+  if (!fixed_setup) {
+    omega = map(mouseX, 0, width, 0, 1);
+    omega = map(sqrt(omega), 0, 1, min_omega, max_omega);
+    float phase = map(mouseY, 0, height, 0, 1);
+    phase = map(sq(phase), 0, 1, min_phase_mult, max_phase_mult);
+    max_phase = phase * omega;
+    min_phase = -max_phase;
+  }
 
   if (doBatch) { 
     batchStep();
@@ -194,13 +202,17 @@ void processImage() {
 }
 
 void mousePressed() {
-  float omega = map(mouseX, 0, width, 0, 1);
-  omega = map(sqrt(omega), 0, 1, min_omega, max_omega);
-  float phase = map(mouseY, 0, height, 0, 1);
-  phase = map(sq(phase), 0, 1, min_phase_mult, max_phase_mult);
-  float max_phase = phase * omega;
+//  float omega = map(mouseX, 0, width, 0, 1);
+//  omega = map(sqrt(omega), 0, 1, min_omega, max_omega);
+//  float phase = map(mouseY, 0, height, 0, 1);
+//  phase = map(sq(phase), 0, 1, min_phase_mult, max_phase_mult);
+//  float max_phase = phase * omega;
   println("Carrier: 2PI * t * " + (omega/TWO_PI));
   println("Phase shift (max signal amplitude): " + max_phase);
+  
+  fixed_setup = !fixed_setup;
+  if(fixed_setup) println("Setup is fixed now."); else println("Move your mouse to change setup.");
+  
 }
 
 void keyPressed() {

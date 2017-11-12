@@ -43,6 +43,7 @@ List:
   * Obj2Raw - convert OBJ vertex data to RAW 8 bit signed (for sonification purposes)
   * granularresynth - Granular (re)synthesis of any RAW using other RAWs for visual/audio
   * -> sonification - image sonification 
+  * -> GLIC - glitch image codec
   * TEMPLATE - clean template sketch with some predefined functions
 
 ## Processing 3
