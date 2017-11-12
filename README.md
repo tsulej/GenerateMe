@@ -48,5 +48,8 @@ List:
 
 ## Processing 3
 
-  * pixeldrifter - provided by https://github.com/romanrandom
+  * pixeldrifter
   * pngglitch
+  * Obj2Raw
+	
+	provided by https://github.com/romanrandom
