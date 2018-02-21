@@ -17,7 +17,9 @@ boolean do_blend = false; // blend image after process
 int blend_mode = OVERLAY; // blend type
 
 int position = 3; // value from 0 to 8, 4 - median filter
-int channel = BRIGHTNESS;
+int channel = HUE;
+int iters = 2 ; // number of iterations on image before refreshing view
+int batch_iters = 100; // number of iterations per frame in batch processing
 
 // working buffer
 PGraphics buffer;
@@ -28,21 +30,13 @@ PImage img;
 String sessionid;
 
 void setup() {
-  sessionid = hex((int)random(0xffff),4);
+  sessionid = hex((int)random(0xffff), 4);
   img = loadImage(foldername+filename+fileext);
-  
-  buffer = createGraphics(img.width, img.height);
-  buffer.beginDraw();
-  buffer.noStroke();
-  buffer.smooth(8);
-  buffer.background(0);
-  buffer.image(img,0,0);
-  buffer.endDraw();
-  
+
   // calculate window size
   float ratio = (float)img.width/(float)img.height;
   int neww, newh;
-  if(ratio < 1.0) {
+  if (ratio < 1.0) {
     neww = (int)(max_display_size * ratio);
     newh = max_display_size;
   } else {
@@ -50,66 +44,96 @@ void setup() {
     newh = (int)(max_display_size / ratio);
   }
 
-  size(neww,newh);
-  
+  size(neww, newh);
+  reinit();
+}
+
+void reinit() {
   chan_data = new int[img.width][img.height];
+  target = new int[img.width][img.height];
+  buffer = createGraphics(img.width, img.height);
+  buffer.beginDraw();
+  buffer.noStroke();
+  buffer.smooth(8);
+  buffer.background(0);
+  buffer.image(img, 0, 0);
+  buffer.endDraw();
+  buffer.loadPixels();
+
+  for (int y=0; y<img.height; y++) {
+    int off = y*img.width;
+    for (int x=0; x<img.width; x++) {
+      color c = buffer.pixels[x+off] & 0x00ffffff;
+      chan_data[x][y] = (((getChannel(c, channel)) & 0xff) << 24) | c;
+      target[x][y] = chan_data[x][y];
+    }
+  }
 }
 
 void draw() {
-  processImage();
+  try {
+    if (doBatch) { 
+      batchStep();
+    } else { 
+      processImage(iters);
+    }
+  } 
+  catch (Exception e) {
+    e.printStackTrace();
+    noLoop();
+  }
 }
 
-int[][] chan_data;
+void batchCallback(float time) {
+  /// every image this functions is called
+  /// time ranges from 0 (first image) to 1 (last image)
+  /// set global variables or whatever you want
+}
+
+int[][] chan_data, target;
 int[] tmp = new int[9];
 
-void processImage() {
-  buffer.beginDraw();
+void processImage(int iters) throws Exception {
+  //  int currtime = millis();
 
-  for(int x=0;x<img.width;x++) {
-    for(int y=0;y<img.height;y++) {
-      color c = buffer.get(x,y) & 0x00ffffff;
-      chan_data[x][y] = ((((int)getChannel(c,channel)) & 0xff) << 24) | c;            
+  for (int i=0; i<iters; i++) {
+    run_and_wait(chan_data, target, position);
+    int[][] tmp = target;
+    target = chan_data;
+    chan_data = tmp;
+  }
+
+  for (int y=0; y<img.height; y++) {
+    int off = y*img.width;
+    for (int x=0; x<img.width; x++) {
+      buffer.pixels[x+off] = chan_data[x][y] | 0xff000000;
     }
   }
-  
-  
-  for(int x=1;x<img.width-1;x++) {
-    for(int y=1;y<img.height-1;y++) {
-      tmp[0] = chan_data[x-1][y-1];
-      tmp[1] = chan_data[x][y-1];
-      tmp[2] = chan_data[x+1][y-1];
-      
-      tmp[3] = chan_data[x-1][y];
-      tmp[4] = chan_data[x][y];
-      tmp[5] = chan_data[x+1][y];
 
-      tmp[6] = chan_data[x-1][y+1];
-      tmp[7] = chan_data[x][y+1];
-      tmp[8] = chan_data[x+1][y+1];
+  buffer.updatePixels();
 
-      int[] s = sort(tmp);
-      buffer.fill( (s[position] & 0x00ffffff) | 0xff000000 );
-      buffer.rect(x,y,1,1);      
-    } //<>//
+  if (do_blend) {
+    buffer.beginDraw();
+    buffer.blend(img, 0, 0, img.width, img.height, 0, 0, buffer.width, buffer.height, blend_mode);
+    buffer.endDraw();
   }
-  
-  
-  
-  if(do_blend)
-    buffer.blend(img,0,0,img.width,img.height,0,0,buffer.width,buffer.height,blend_mode);
-    
-  buffer.endDraw();
-  image(buffer,0,0,width,height);
+
+  image(buffer, 0, 0, width, height);
+
+  //  println(millis()-currtime);
 }
 
 void keyPressed() {
+  if (key == 'b' && !doBatch) {
+    batchProcess();
+  }
   // SPACE to save
-  if(keyCode == 32) {
-    String fn = foldername + filename + "/res_" + sessionid + hex((int)random(0xffff),4)+"_"+filename+fileext;
+  if (keyCode == 32) {
+    String fn = foldername + filename + "/res_" + sessionid + hex((int)random(0xffff), 4)+"_"+filename+fileext;
     buffer.save(fn);
     println("Image "+ fn + " saved");
   }
-  if(keyCode >= 48 && keyCode <= 56) {
+  if (keyCode >= 48 && keyCode <= 56) {
     position = keyCode - 48;
     println("Position = " + position);
   }
@@ -117,7 +141,9 @@ void keyPressed() {
 
 //
 
-final static int[] blends = {ADD, SUBTRACT, DARKEST, LIGHTEST, DIFFERENCE, EXCLUSION, MULTIPLY, SCREEN, OVERLAY, HARD_LIGHT, SOFT_LIGHT, DODGE, BURN};
+final static int[] blends = {
+  ADD, SUBTRACT, DARKEST, LIGHTEST, DIFFERENCE, EXCLUSION, MULTIPLY, SCREEN, OVERLAY, HARD_LIGHT, SOFT_LIGHT, DODGE, BURN
+};
 
 // ALL Channels, Nxxx stand for negative (255-value)
 // channels to work with
@@ -134,18 +160,69 @@ final static int NHUE = 9;
 final static int NSATURATION = 10;
 final static int NBRIGHTNESS = 11;
 
-float getChannel(color c, int channel) {
+int getChannel(color c, int channel) {
   int ch = channel>5?channel-6:channel;
-  float cc;
-  
+  int cc;
+
   switch(ch) {
-    case RED: cc = red(c); break;
-    case GREEN: cc = green(c); break;
-    case BLUE: cc = blue(c); break;
-    case HUE: cc = hue(c); break;
-    case SATURATION: cc = saturation(c); break;
-    default: cc= brightness(c); break;
+  case RED: 
+    cc = ((c>>16) & 0xff); 
+    break;
+  case GREEN: 
+    cc = ((c>>8) & 0xff); 
+    break;
+  case BLUE: 
+    cc = (c &0xff); 
+    break;
+  case HUE: 
+    cc = (int)hue(c); 
+    break;
+  case SATURATION: 
+    cc = (int)saturation(c); 
+    break;
+  default: 
+    cc= (int)brightness(c); 
+    break;
   }
-  
+
   return channel>5?255-cc:cc;
 }
+
+void batchStep() throws Exception {
+  File n = batchList[batchIdx];
+  String name = n.getAbsolutePath(); 
+  if (name.endsWith(fileext)) {
+    print(n.getName()+"... ");
+    img = loadImage(name);
+    img.loadPixels();
+    reinit();
+    batchCallback((float)batchIdx / batchFiles);
+    processImage(batch_iters);
+    buffer.save(foldername+batchUID+"/"+n.getName());
+    println("saved");
+  }
+  batchIdx++;
+  if (batchIdx >= batchList.length) {
+    doBatch = false;
+    println("results saved in "+ foldername+batchUID + " folder");
+  }
+}
+
+File[] batchList;
+int batchIdx = 0;
+String batchUID;
+boolean doBatch = false;
+float batchFiles = 0;
+void batchProcess() {
+  batchUID = sessionid + hex((int)random(0xffff), 4);
+  File dir = new File(sketchPath+'/'+foldername);
+  batchList = dir.listFiles();
+  batchIdx = 0;
+  batchFiles = 0;
+  for (File n : batchList) {
+    if (n.getName().endsWith(fileext)) batchFiles=batchFiles+1.0;
+  }
+  println("Processing "+int(batchFiles)+" images from folder: " + foldername);
+  doBatch = true;
+}
+
