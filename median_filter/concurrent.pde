@@ -82,7 +82,7 @@ void run_and_wait(int[][] source, int[][] target, int nth) throws InterruptedExc
   int cores = (int)(1.5*Runtime.getRuntime().availableProcessors());
   int range = img.width/cores;
   
-  Future<Boolean>[] futures = new Future[cores];
+  Future<Boolean>[] futures = new Future[cores+1];
   
   int i=1;
   int iter=0;

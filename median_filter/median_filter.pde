@@ -93,6 +93,7 @@ void batchCallback(float time) {
 int[][] chan_data, target;
 int[] tmp = new int[9];
 
+int time = 0;
 void processImage(int iters) throws Exception {
   //  int currtime = millis();
 
@@ -119,6 +120,9 @@ void processImage(int iters) throws Exception {
   }
 
   image(buffer, 0, 0, width, height);
+
+  //buffer.save("../TTT/fra/"+nf(time,6)+".jpg");
+  time++;
 
   //  println(millis()-currtime);
 }
