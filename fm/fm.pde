@@ -81,7 +81,7 @@ void setup() {
     newh = (int)(max_display_size / ratio);
   }
 
-  size(neww, newh);
+  surface.setSize(neww, newh);
 
   img.loadPixels();
 
@@ -305,7 +305,7 @@ boolean doBatch = false;
 float batchFiles = 0;
 void batchProcess() {
   batchUID = sessionid + hex((int)random(0xffff), 4);
-  File dir = new File(sketchPath+'/'+foldername);
+  File dir = new File(sketchPath()+'/'+foldername);
   batchList = dir.listFiles();
   batchIdx = 0;
   batchFiles = 0;
@@ -315,4 +315,3 @@ void batchProcess() {
   println("Processing "+int(batchFiles)+" images from folder: " + foldername);
   doBatch = true;
 }
-
