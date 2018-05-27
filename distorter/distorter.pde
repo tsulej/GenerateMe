@@ -7,9 +7,9 @@
 //   * move mouse around image
 
 // set up filename
-String filename = "DfJpdFD copy";
+String filename = "test";
 String fileext = ".jpg";
-String foldername = "./../";
+String foldername = "./";
 
 int max_display_size = 1000; // viewing window size (regardless image size)
 
