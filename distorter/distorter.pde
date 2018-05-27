@@ -52,7 +52,7 @@ void setup() {
     newh = (int)(max_display_size / ratio);
   }
 
-  size(neww,newh);
+  surface.setSize(neww,newh);
   
   // prepare distortion pattern
   for(int i=0;i<512;i++) {
