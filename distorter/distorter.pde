@@ -7,9 +7,9 @@
 //   * move mouse around image
 
 // set up filename
-String filename = "test";
+String filename = "DfJpdFD copy";
 String fileext = ".jpg";
-String foldername = "./";
+String foldername = "./../";
 
 int max_display_size = 1000; // viewing window size (regardless image size)
 
@@ -52,7 +52,7 @@ void setup() {
     newh = (int)(max_display_size / ratio);
   }
 
-  size(neww,newh);
+  surface.setSize(neww,newh);
   
   // prepare distortion pattern
   for(int i=0;i<512;i++) {
