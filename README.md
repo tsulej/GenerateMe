@@ -48,15 +48,17 @@ List:
 
 ## Processing 3
 
+By https://github.com/romanrandom:
+
   * pixeldrifter
   * pngglitch
   * Obj2Raw
+  
+By https://github.com/philhudson91:
+ 
   * threadraw
   * ultimateSort
   * watmap
   * wavelets
   * wrongqsort
   * wzipprocess2
-
-	provided by https://github.com/romanrandom
-  some Processing 3 conversions by https://github.com/philhudson91
