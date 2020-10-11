@@ -57,11 +57,12 @@ In order to have scripts working in Processing 3 change (thanks to *Aitor*):
 
 Some of them are ported by:
 
-https://github.com/romanrandom:
+https://github.com/wabisabit:
 
 * pixeldrifter
 * pngglitch
 * Obj2Raw
+* slitscan
   
 https://github.com/philhudson91:
  
