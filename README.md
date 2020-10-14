@@ -10,7 +10,7 @@ clone recursively ```git clone --recursive https://github.com/tsulej/GenerateMe.
 
 Detailed instructions inside scripts, examples included.
 
-**WARNING! Latest Processing 2 only! Looking for Processing 3 versions? See below.**
+**WARNING! Latest Processing 2 only! Looking for Processing 3 versions? [See below](#processing-3).**
 
 List:
 
@@ -54,14 +54,17 @@ In order to have scripts working in Processing 3 change (thanks to *Aitor*):
 
 * ```size()``` to ```surface.setSize()```
 * ```sketchPath``` to ```sketchPath()```
+* ```buffer.loadPixels()``` must be called after ```buffer.beginDraw()```
+* Calling a function that draws from the buffer into the window needs to be done in ```draw()```
 
 Some of them are ported by:
 
 https://github.com/wabisabit:
 
+* blendimages
+* Obj2Raw
 * pixeldrifter
 * pngglitch
-* Obj2Raw
 * slitscan
   
 https://github.com/philhudson91:
