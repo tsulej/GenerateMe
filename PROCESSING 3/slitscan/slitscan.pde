@@ -64,6 +64,7 @@ void setup() {
     newh = (int)(max_display_size / ratio);
   }
 
+  surface.setResizable(true);
   surface.setSize(neww, newh);
  
   for(int i=0;i<32;i++) {
