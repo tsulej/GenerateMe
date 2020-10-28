@@ -62,6 +62,7 @@ Some of them are ported by:
 https://github.com/wabisabit:
 
 * blendimages
+* decayscreen
 * Obj2Raw
 * pixeldrifter
 * pngglitch
