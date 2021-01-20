@@ -84,12 +84,12 @@ Pull request welcome!!!
 
 ## Donation
 
-Actually I don't need financial aid (hey, it's a hobby project I really enjoy). But! There is a disabled kid in my family (unfortunate chromosom 14 deletion) which requires constant support. If you wish to spend some money and make Anthony's (that's his name) better, it's the best thing you can do. Thank you in advance.
+Actually I don't need financial aid (hey, it's a hobby project I really enjoy). But! There is a disabled kid in my family (unfortunate chromosom 14 deletion) which requires constant support. If you wish to spend some money and make Anthony's (that's his name) life better, that's the best thing you can do. Thank you in advance.
 
-The charity organization which look after him is https://dzieciom.pl/o-fundacji/english
+The charity organization which looks after him is: https://dzieciom.pl/o-fundacji/english
 Anthony's profile: https://dzieciom.pl/podopieczni/28200
 
-If you want make a transfer here is the info (https://dzieciom.pl/chce-pomoc)
+If you want make a transfer here is the info (https://dzieciom.pl/chce-pomoc):
 
 * Transfer title (most important): 28200 Antoni Kosciukiewicz
 * SWIFT/BIC: ALBPPLPW
