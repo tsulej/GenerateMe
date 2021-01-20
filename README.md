@@ -12,7 +12,11 @@ Detailed instructions inside scripts, examples included.
 
 **WARNING! Latest Processing 2 only! Looking for Processing 3 versions? [See below](#processing-3).**
 
-List:
+## Tutorials
+
+* FM tutorial by [Moon-Harpy](https://www.moonharpyproject.ie/) - https://www.youtube.com/watch?v=Gi4ce5DTWks
+
+## Scripts
 
 * decayscreen - decay image, based on XScreenSaver hack with the same name
 * drawing_generative - draw image using strokes based on channel value
