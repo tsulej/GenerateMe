@@ -97,5 +97,5 @@ If you want make a transfer here is the info (https://dzieciom.pl/chce-pomoc):
     * EUR: PL 82 2490 0005 0000 4600 7337 4309
     * USD: PL 90 2490 0005 0000 4530 9858 4994
     * GBP: PL 28 2490 0005 0000 4600 6246 8310
-    * PLN: PL 42 2490 0005 0000 4600 7549 3994\
+    * PLN: PL 42 2490 0005 0000 4600 7549 3994
    
