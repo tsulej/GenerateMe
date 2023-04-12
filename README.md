@@ -1,3 +1,5 @@
+**WARNING! Latest Processing 2 only! Looking for Processing 3 versions? [See below](#processing-3).**
+
 # GenerateMe
 Processing scripts used to generative glitch / art / design
 
